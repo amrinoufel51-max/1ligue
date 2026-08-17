@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sadara | Global Prediction League</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        
+        body {
+            background: #090210;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* الخلفية المتحركة الفخمة */
+        .background-animation {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(135deg, #16002b, #090210, #240046);
+            background-size: 400% 400%; animation: gradientShift 12s ease infinite; z-index: -1;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+
+        /* شارة الـ ID في الأعلى */
+        #user-badge {
+            position: fixed; top: 20px; right: 20px; background: rgba(114, 9, 183, 0.25);
+            border: 1px solid #7209b7; padding: 8px 16px; border-radius: 30px; font-size: 15px; font-weight: bold; 
+            color: #e0aaff; display: none; z-index: 100; backdrop-filter: blur(5px);
+        }
+
+        /* تحسين المقاسات لتكون مريحة وعريضة قليلاً بدون تصغير */
+        .screen {
+            display: none; width: 100%; max-width: 520px; 
+            background: rgba(22, 11, 42, 0.9); backdrop-filter: blur(15px);
+            border: 1px solid rgba(114, 9, 183, 0.4); padding: 35px 30px; 
+            border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); text-align: center;
+        }
+        .screen.active { display: block; }
+
+        h2 { font-size: 26px; color: #e0aaff; margin-bottom: 25px; font-weight: 700; letter-spacing: 0.5px; }
+        
+        /* حقل التسجيل الكبير والمريح */
+        .input-box {
+            width: 100%; padding: 18px; font-size: 18px; border-radius: 16px;
+            border: 2px solid #560bad; background: #0f051d; color: #ffffff;
+            margin-bottom: 20px; outline: none; text-align: center; font-weight: 600;
+            transition: 0.3px;
+        }
+        .input-box:focus { border-color: #b5179e; box-shadow: 0 0 15px rgba(181, 23, 158, 0.4); }
+
+        /* الأزرار الكبيرة الواضحة */
+        .btn-main {
+            width: 100%; padding: 18px; font-size: 18px; font-weight: bold;
+            border-radius: 16px; border: none; background: #3a0ca3; color: white;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(58,12,163,0.4);
+        }
+        .btn-main:hover { background: #480ca8; transform: translateY(-2px); }
+        .btn-main:disabled { background: #2b2d42; opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+        /* تصميم الكاردات الرئيسية (الرئيسية) */
+        .cards-container { display: flex; flex-direction: column; gap: 20px; }
+        .card {
+            background: linear-gradient(135deg, #3a0ca3, #7209b7); padding: 25px; border-radius: 18px;
+            font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; 
+            box-shadow: 0 8px 20px rgba(114,9,183,0.3); text-align: left; 
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 25px rgba(114,9,183,0.5); }
+
+        .btn-back { background: transparent; border: none; color: #e0aaff; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; float: left; display: flex; align-items: center; gap: 5px; }
+        .btn-back:hover { color: #fff; }
+
+        /* ===== تصميم بطاقة المباراة (على طراز مواقع المراهنات الفخمة) ===== */
+        .betting-card {
+            background: #100522; border: 1px solid #3a0ca3; border-radius: 18px;
+            padding: 20px; margin-bottom: 25px; box-shadow: inset 0 0 15px rgba(58,12,163,0.2);
+        }
+        .match-header { font-size: 13px; color: #b5179e; font-weight: bold; text-transform: uppercase; margin-bottom: 15px; letter-spacing: 1px; }
+        .match-teams { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
+        .team-name { flex: 1; text-align: center; }
+        .vs-badge { color: #f72585; font-size: 14px; padding: 0 10px; font-weight: 900; }
+
+        /* أزرار المراهنة الفخمة (Odds-style buttons) */
+        .odds-container { display: flex; gap: 10px; }
+        .odd-btn {
+            flex: 1; padding: 15px 10px; background: #1a0b32; border: 2px solid #560bad;
+            border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s;
+            display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 15px;
+        }
+        .odd-btn span { font-size: 12px; color: #b5179e; font-weight: normal; }
+        .odd-btn:hover { border-color: #f72585; background: #240046; }
+        .odd-btn.selected { background: #7209b7; border-color: #4cc9f0; box-shadow: 0 0 15px rgba(76,201,240,0.4); }
+
+        /* ===== جدول الترتيب العصري والمرتب ===== */
+        .leaderboard-table { width: 100%; border-collapse: collapse; text-align: left; }
+        .leaderboard-table th { background: #240046; color: #e0aaff; padding: 14px; font-size: 15px; border-bottom: 2px solid #560bad; }
+        .leaderboard-table td { padding: 14px; border-bottom: 1px solid rgba(114,9,183,0.2); font-size: 16px; }
+        .leaderboard-table tr:hover { background: rgba(114,9,183,0.1); }
+        .rank-num { font-weight: bold; color: #f72585; }
+        .player-points { font-weight: bold; color: #4cc9f0; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="background-animation"></div>
+    <div id="user-badge">ID: <span id="badge-id">---</span></div>
+
+    <!-- 1. شاشة التسجيل المريحة والكبيرة -->
+    <div id="welcome-screen" class="screen active">
+        <h2>Sadara League</h2>
+        <p style="color: #b5179e; margin-bottom: 25px; font-size: 16px;">Enter your nickname to join the global arena</p>
+        <input type="text" id="username-input" class="input-box" placeholder="Your Nickname...">
+        <button id="start-btn" class="btn-main" disabled>Enter Arena</button>
+    </div>
+
+    <!-- 2. الشاشة الرئيسية (2 Cards كبيرة وواضحة) -->
+    <div id="main-screen" class="screen">
+        <h2>Welcome, <span id="user-welcome-name" style="color:#4cc9f0;"></span></h2>
+        
+        <div class="cards-container">
+            <div class="card" onclick="openScreen('match-screen')">
+                <div>
+                    <div style="font-size: 14px; color: #b5179e; margin-bottom: 5px;">LIVE MATCH</div>
+                    ⚽ Match Prediction
+                </div>
+                <span style="font-size: 24px;">➔</span>
+            </div>
+            
+            <div class="card" onclick="openScreen('leaderboard-screen')">
+                <div>
+                    <div style="font-size: 14px; color: #b5179e; margin-bottom: 5px;">GLOBAL RANKING</div>
+                    🏆 Leaderboard
+                </div>
+                <span style="font-size: 24px;">➔</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. شاشة المباراة (تصميم Bet Card فخم وعصري) -->
+    <div id="match-screen" class="screen">
+        <button class="btn-back" onclick="openScreen('main-screen')">← Back to Menu</button>
+        <h2 style="clear: both;">Match Center</h2>
+        
+        <div class="betting-card">
+            <div class="match-header">La Liga • Matchday 30</div>
+            <div class="match-teams">
+                <div class="team-name">Real Madrid</div>
+                <div class="vs-badge">VS</div>
+                <div class="team-name">Barcelona</div>
+            </div>
+            <p style="font-size: 14px; color: #b5179e; margin-bottom: 15px;">Select match outcome:</p>
+            
+            <div class="odds-container">
+                <button class="odd-btn" onclick="selectWinner('Real Madrid')" id="btn-real">
+                    Real Madrid <span>Home Win</span>
+                </button>
+                <button class="odd-btn" onclick="selectWinner('Draw')" id="btn-draw">
+                    Draw <span>Tie</span>
+                </button>
+                <button class="odd-btn" onclick="selectWinner('Barcelona')" id="btn-barca">
+                    Barcelona <span>Away Win</span>
+                </button>
+            </div>
+        </div>
+
+        <button id="submit-prediction-btn" class="btn-main" onclick="sendPredictionToTelegram()" disabled>Submit Prediction</button>
+    </div>
+
+    <!-- 4. شاشة جدول الترتيب العصري والمرتب -->
+    <div id="leaderboard-screen" class="screen">
+        <button class="btn-back" onclick="openScreen('main-screen')">← Back to Menu</button>
+        <h2 style="clear: both;">Global Leaderboard</h2>
+        
+        <div style="background: rgba(15, 5, 29, 0.95); border-radius: 16px; border: 1px solid #560bad; overflow: hidden;">
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th style="width: 20%; text-align:center;">Rank</th>
+                        <th style="width: 55%;">Player</th>
+                        <th style="width: 25%; text-align:center;">Points</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <!-- سيتم تعبئة البيانات أوتوماتيكياً هنا -->
+                    <tr>
+                        <td class="rank-num" style="text-align:center;">1</td>
+                        <td>Ahmed (You)</td>
+                        <td class="player-points">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const usernameInput = document.getElementById('username-input');
+        const startBtn = document.getElementById('start-btn');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const mainScreen = document.getElementById('main-screen');
+        const userBadge = document.getElementById('user-badge');
+        const badgeId = document.getElementById('badge-id');
+        const userWelcomeName = document.getElementById('user-welcome-name');
+
+        let selectedTeam = "";
+
+        usernameInput.addEventListener('input', () => {
+            if (usernameInput.value.trim().length > 0) {
+                startBtn.classList.add('active');
+                startBtn.disabled = false;
+            } else {
+                startBtn.classList.remove('active');
+                startBtn.disabled = true;
+            }
+        });
+
+        startBtn.addEventListener('click', () => {
+            const username = usernameInput.value.trim();
+            const userId = 'USR-' + Math.floor(1000 + Math.random() * 9000);
+
+            localStorage.setItem('user_name', username);
+            localStorage.setItem('user_id', userId);
+
+            welcomeScreen.classList.remove('active');
+            badgeId.innerText = userId;
+            userBadge.style.display = 'block';
+            userWelcomeName.innerText = username;
+            mainScreen.classList.add('active');
+        });
+
+        function openScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function selectWinner(team) {
+            selectedTeam = team;
+            document.querySelectorAll('.odd-btn').forEach(b => b.classList.remove('selected'));
+            if(team === 'Real Madrid') document.getElementById('btn-real').classList.add('selected');
+            if(team === 'Draw') document.getElementById('btn-draw').classList.add('selected');
+            if(team === 'Barcelona') document.getElementById('btn-barca').classList.add('selected');
+
+            document.getElementById('submit-prediction-btn').disabled = false;
+        }
+
+        async function sendPredictionToTelegram() {
+            const username = localStorage.getItem('user_name');
+            const userId = localStorage.getItem('user_id');
+
+            const botToken = "ضع_توكن_البوت_هنا";
+            const chatId = "ضع_آي دي_المجموعة_هنا";
+            const message = `🎯 New Prediction!\n👤 Player: ${username} (${userId})\n⚽ Picked: ${selectedTeam}`;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`);
+                alert("Prediction sent successfully to Telegram!");
+                openScreen('main-screen');
+            } catch (e) {
+                alert("Failed to send prediction.");
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('user_name');
+            const savedId = localStorage.getItem('user_id');
+            if (savedName && savedId) {
+                welcomeScreen.classList.remove('active');
+                badgeId.innerText = savedId;
+                userBadge.style.display = 'block';
+                userWelcomeName.innerText = savedName;
+                mainScreen.classList.add('active');
+            }
+        });
+    </script>
+</body>
+</html>
