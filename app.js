@@ -132,7 +132,7 @@ async function loadMatches() {
     }
 }
 
-// 2. إرسال التوقع وحفظه في Firebase
+// 2. إرسال التوقع وحفظه في Firebase مع تحديث جدول الترتيب بـ 0 نقاط مبدئياً
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
 
@@ -144,6 +144,8 @@ async function submitPrediction(matchId, choice, btnElement) {
 
     try {
         const docId = `${userId}_${matchId}`;
+        
+        // 1. حفظ التوقع
         await setDoc(doc(db, "predictions", docId), {
             userId: userId,
             matchId: matchId,
@@ -151,7 +153,18 @@ async function submitPrediction(matchId, choice, btnElement) {
             timestamp: new Date()
         });
 
-        // تغيير ألوان الأزرار لإظهار التوقع النشط
+        // 2. التحقق مما إذا كان المستخدم موجوداً مسبقاً في جدول الترتيب، وإلا إضافته بـ 0 نقاط
+        const userLeaderboardRef = doc(db, "leaderboard", userId);
+        const userLeaderboardSnap = await getDoc(userLeaderboardRef);
+
+        if (!userLeaderboardSnap.exists()) {
+            await setDoc(userLeaderboardRef, {
+                userId: userId,
+                totalPoints: 0
+            });
+        }
+
+        // تأثير بصري للزر
         const parent = btnElement.parentElement;
         parent.querySelectorAll('button').forEach(b => {
             b.classList.remove('bg-emerald-500', 'text-slate-950', 'border-emerald-400');
@@ -161,6 +174,7 @@ async function submitPrediction(matchId, choice, btnElement) {
         btnElement.classList.add('bg-emerald-500', 'text-slate-950', 'border-emerald-400');
 
         alert(`✅ تم تسجيل توقعك (${choice}) بنجاح يا ${userId}!`);
+        loadLeaderboard(); // تحديث الجدول فوراً ليظهر بـ 0 نقاط
     } catch (error) {
         console.error("خطأ في حفظ التوقع:", error);
         alert("❌ حدث خطأ أثناء إرسال التوقع.");
