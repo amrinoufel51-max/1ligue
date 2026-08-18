@@ -78,7 +78,7 @@ async function loadMatches() {
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
                             <img src="${homeLogo}" 
-                                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'" 
+                                 onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
                                  class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${match.homeTeam}</span>
@@ -96,7 +96,7 @@ async function loadMatches() {
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
                             <img src="${awayLogo}" 
-                                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'" 
+                                 onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
                                  class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${match.awayTeam}</span>
