@@ -47,7 +47,7 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// 1. جلب المباريات
+// 1. جلب المباريات مع تكبير اللوغوهات
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     try {
@@ -67,21 +67,27 @@ async function loadMatches() {
             const isStarted = now >= matchTime;
 
             const card = document.createElement('div');
-            card.className = "glass p-4 rounded-xl space-y-3 shadow-md";
+            card.className = "glass p-5 rounded-2xl space-y-4 shadow-xl border border-sky-500/20";
             card.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-2 w-1/3">
-                        <img src="${match.homeLogo}" class="w-10 h-10 object-contain bg-slate-950 p-1 rounded-lg">
-                        <span class="font-bold text-sm">${match.homeTeam}</span>
+                    <!-- الفريق المضيف -->
+                    <div class="flex flex-col items-center gap-2 w-1/3 text-center">
+                        <img src="${match.homeLogo}" class="w-16 h-16 object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        <span class="font-bold text-sm text-white">${match.homeTeam}</span>
                     </div>
-                    <div class="text-center w-1/3">
-                        <span class="text-[10px] text-sky-400 bg-sky-950/60 px-2.5 py-1 rounded-full border border-sky-900/50">
+
+                    <!-- التوقيت أو الحالة -->
+                    <div class="text-center w-1/3 space-y-1">
+                        <span class="text-[10px] uppercase font-bold text-sky-400 bg-sky-950/80 px-3 py-1 rounded-full border border-sky-900/50 shadow">
                             ${isStarted ? '🔴 Started' : matchTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                         </span>
+                        <div class="text-xs text-slate-500 font-semibold">VS</div>
                     </div>
-                    <div class="flex items-center gap-2 w-1/3 justify-end">
-                        <span class="font-bold text-sm text-right">${match.awayTeam}</span>
-                        <img src="${match.awayLogo}" class="w-10 h-10 object-contain bg-slate-950 p-1 rounded-lg">
+
+                    <!-- الفريق الضيف -->
+                    <div class="flex flex-col items-center gap-2 w-1/3 text-center">
+                        <img src="${match.awayLogo}" class="w-16 h-16 object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        <span class="font-bold text-sm text-white">${match.awayTeam}</span>
                     </div>
                 </div>
             `;
@@ -92,7 +98,7 @@ async function loadMatches() {
 
             opts.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = `flex-1 py-2 rounded-lg text-xs font-bold border transition ${isStarted ? 'bg-slate-950 text-slate-600 border-slate-900' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
+                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${isStarted ? 'bg-slate-950 text-slate-600 border-slate-900' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
                 btn.textContent = opt.l;
                 if (!isStarted) btn.onclick = () => submitPrediction(matchId, opt.v, btn);
                 actions.appendChild(btn);
@@ -124,9 +130,10 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب وتمييز اسم المستخدم بلون مختلف
+// 3. جلب الترتيب مع بطاقة Fantasy العلوية والجدول العام
 async function loadLeaderboard() {
-    const container = document.getElementById('leaderboardContainer');
+    const tableContainer = document.getElementById('leaderboardContainer');
+    const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
 
     try {
@@ -134,26 +141,75 @@ async function loadLeaderboard() {
         const snap = await getDocs(q);
 
         if (snap.empty) {
-            container.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
+            tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
+            if(myCardContainer) myCardContainer.innerHTML = `<span class="text-xs text-slate-400">Save your ID to see your rank.</span>`;
             return;
         }
 
-        let html = `<table class="w-full text-left text-xs">`;
         let rank = 1;
+        let myData = null;
+        let myRank = 0;
+        let tableHtml = `<table class="w-full text-left text-xs">`;
+        const players = [];
 
         snap.forEach(docSnap => {
-            const data = docSnap.data();
-            const isMe = data.userId === currentUserId;
+            players.push(docSnap.data());
+        });
 
-            // إذا كان هو أنت، نلون السطر بالأزرق المميز ونكتب بجانبه (You)
-            html += `
+        players.forEach(data => {
+            const isMe = data.userId === currentUserId;
+            if (isMe) {
+                myData = data;
+                myRank = rank;
+            }
+
+            tableHtml += `
                 <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
-                    <td class="py-2.5 px-2">#${rank++}</td>
-                    <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑 (You)' : ''}</td>
+                    <td class="py-2.5 px-2">#${rank}</td>
+                    <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
                     <td class="py-2.5 px-2 text-right text-cyan-400">${data.totalPoints || 0} pts</td>
                 </tr>`;
+            rank++;
         });
-        html += `</table>`;
-        container.innerHTML = html;
-    } catch (e) { console.error(e); }
+        tableHtml += `</table>`;
+        if(tableContainer) tableContainer.innerHTML = tableHtml;
+
+        // عرض بطاقة Fantasy الخاصة بك في الأعلى
+        if (myCardContainer) {
+            if (currentUserId) {
+                if (myData) {
+                    myCardContainer.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">
+                                #${myRank}
+                            </div>
+                            <div>
+                                <div class="text-xs text-sky-300 font-semibold">Your Rank & Stats</div>
+                                <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">Total Points</div>
+                            <div class="text-lg font-black text-cyan-400">${myData.totalPoints || 0} pts</div>
+                        </div>
+                    `;
+                } else {
+                    myCardContainer.innerHTML = `
+                        <div class="text-xs text-amber-400 py-1">
+                            ⚠️ ID (${currentUserId}) not found in rankings yet. Make a prediction!
+                        </div>
+                    `;
+                }
+            } else {
+                myCardContainer.innerHTML = `
+                    <div class="text-xs text-slate-400 py-1">
+                        🔍 Enter and save your ID above to track your personal rank.
+                    </div>
+                `;
+            }
+        }
+
+    } catch (e) { 
+        console.error(e); 
+    }
 }
