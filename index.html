@@ -1,240 +1,83 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sadara | Global Prediction League</title>
+    <title>دوري التوقعات الرياضي</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background: #090210; color: #ffffff; min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 20px; position: relative; overflow-x: hidden; }
-        .background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #16002b, #090210, #240046); background-size: 400% 400%; animation: gradientShift 12s ease infinite; z-index: -1; }
-        @keyframes gradientShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-        #user-badge { position: fixed; top: 20px; right: 20px; background: rgba(114, 9, 183, 0.25); border: 1px solid #7209b7; padding: 8px 16px; border-radius: 30px; font-size: 15px; font-weight: bold; color: #e0aaff; display: none; z-index: 100; backdrop-filter: blur(5px); }
-        .screen { display: none; width: 100%; max-width: 520px; background: rgba(22, 11, 42, 0.9); backdrop-filter: blur(15px); border: 1px solid rgba(114, 9, 183, 0.4); padding: 35px 30px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); text-align: center; }
-        .screen.active { display: block; }
-        h2 { font-size: 26px; color: #e0aaff; margin-bottom: 25px; font-weight: 700; }
-        .input-box { width: 100%; padding: 18px; font-size: 18px; border-radius: 16px; border: 2px solid #560bad; background: #0f051d; color: #ffffff; margin-bottom: 20px; outline: none; text-align: center; font-weight: 600; }
-        .btn-main { width: 100%; padding: 18px; font-size: 18px; font-weight: bold; border-radius: 16px; border: none; background: #3a0ca3; color: white; cursor: pointer; transition: 0.3s; box-shadow: 0 5px 15px rgba(58,12,163,0.4); }
-        .btn-main:disabled { background: #2b2d42; opacity: 0.5; cursor: not-allowed; }
-        .cards-container { display: flex; flex-direction: column; gap: 20px; }
-        .card { background: linear-gradient(135deg, #3a0ca3, #7209b7); padding: 25px; border-radius: 18px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 8px 20px rgba(114,9,183,0.3); text-align: left; display: flex; justify-content: space-between; align-items: center; border: 1px solid rgba(255,255,255,0.1); }
-        .card:hover { transform: translateY(-4px); }
-        .btn-back { background: transparent; border: none; color: #e0aaff; font-size: 16px; font-weight: bold; cursor: pointer; margin-bottom: 20px; float: left; display: flex; align-items: center; gap: 5px; }
-        
-        .betting-card { background: #100522; border: 1px solid #3a0ca3; border-radius: 18px; padding: 20px; margin-bottom: 25px; }
-        .match-header { font-size: 13px; color: #b5179e; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
-        .match-teams { display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; margin-bottom: 15px; }
-        .team-box { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        .team-box img { width: 45px; height: 45px; object-fit: contain; }
-        .vs-badge { color: #f72585; font-size: 14px; padding: 0 10px; font-weight: 900; }
-        
-        #deadline-status { font-size: 13px; color: #f72585; font-weight: bold; margin-bottom: 15px; background: rgba(247, 37, 133, 0.1); padding: 8px; border-radius: 8px; border: 1px solid rgba(247, 37, 133, 0.3); }
-
-        .odds-container { display: flex; gap: 10px; }
-        .odd-btn { flex: 1; padding: 15px 10px; background: #1a0b32; border: 2px solid #560bad; border-radius: 12px; color: #fff; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 15px; }
-        .odd-btn span { font-size: 12px; color: #b5179e; font-weight: normal; }
-        .odd-btn.selected { background: #7209b7; border-color: #4cc9f0; box-shadow: 0 0 15px rgba(76,201,240,0.4); }
+        body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
 
-    <div class="background-animation"></div>
-    <div id="user-badge">ID: <span id="badge-id">---</span></div>
-
-    <div id="welcome-screen" class="screen active">
-        <h2>Sadara League</h2>
-        <p style="color: #b5179e; margin-bottom: 25px; font-size: 16px;">Enter your nickname to join</p>
-        <input type="text" id="username-input" class="input-box" placeholder="Your Nickname...">
-        <button id="start-btn" class="btn-main" disabled>Enter Arena</button>
-    </div>
-
-    <div id="main-screen" class="screen">
-        <h2>Welcome, <span id="user-welcome-name" style="color:#4cc9f0;"></span></h2>
-        <div class="cards-container">
-            <div class="card" onclick="openScreen('match-screen')">
-                <div>
-                    <div style="font-size: 14px; color: #b5179e; margin-bottom: 5px;">LIVE MATCH</div>
-                    ⚽ Match Prediction
-                </div>
-                <span style="font-size: 24px;">➔</span>
-            </div>
-            <div class="card" onclick="openScreen('leaderboard-screen')">
-                <div>
-                    <div style="font-size: 14px; color: #b5179e; margin-bottom: 5px;">GLOBAL RANKING</div>
-                    🏆 Leaderboard
-                </div>
-                <span style="font-size: 24px;">➔</span>
-            </div>
-        </div>
-    </div>
-
-    <div id="match-screen" class="screen">
-        <button class="btn-back" onclick="openScreen('main-screen')">← Back to Menu</button>
-        <h2 style="clear: both;">Match Center</h2>
+    <div class="max-w-4xl mx-auto space-y-8">
         
-        <div class="betting-card">
-            <div class="match-header">Today's Match • Sadara League</div>
-            <div id="deadline-status">⏳ Loading match data...</div>
+        <!-- الهيدر -->
+        <header class="text-center space-y-2">
+            <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                ⚡ دوري التوقعات
+            </h1>
+            <p class="text-slate-400 text-sm md:text-base">توقع، نافس، واثبت خبرتك الرياضية!</p>
+        </header>
 
-            <div class="match-teams">
-                <div class="team-box">
-                    <img id="home-logo" src="" alt="Home">
-                    <span id="home-name">Loading...</span>
-                </div>
-                <div class="vs-badge">VS</div>
-                <div class="team-box">
-                    <img id="away-logo" src="" alt="Away">
-                    <span id="away-name">Loading...</span>
+        <!-- قسم إدخال وحفظ الـ ID الخاص بالمستخدم -->
+        <section class="bg-slate-900/80 backdrop-blur p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="w-full md:w-auto flex-1">
+                <label class="block text-xs text-slate-400 mb-1">اسمك أو معرف المستخدم (ID)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="currentUserId" placeholder="مثال: Karim_DZ" 
+                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-bold transition">
+                    <button id="saveIdBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-xs transition">
+                        حفظ الـ ID 💾
+                    </button>
                 </div>
             </div>
-            <p style="font-size: 14px; color: #b5179e; margin-bottom: 15px;">Select match outcome:</p>
-            
-            <div class="odds-container" id="prediction-buttons-box">
-                <button class="odd-btn" onclick="selectWinner('Home')" id="btn-home">Home Win <span>1</span></button>
-                <button class="odd-btn" onclick="selectWinner('Draw')" id="btn-draw">Draw <span>X</span></button>
-                <button class="odd-btn" onclick="selectWinner('Away')" id="btn-away">Away Win <span>2</span></button>
+            <div class="text-xs text-slate-400 text-center md:text-right">
+                💡 <span class="text-emerald-400">تنبيه:</span> يتم قفل التوقعات تلقائياً بمجرد انطلاق المباراة (Deadline).
             </div>
-        </div>
+        </section>
 
-        <button id="submit-prediction-btn" class="btn-main" onclick="sendPredictionToTelegram()" disabled>Submit Prediction</button>
+        <!-- قسم المباريات المتاحة للتوقع -->
+        <section class="space-y-4">
+            <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                <span>⚽</span> مباريات اليوم والتوقعات
+            </h2>
+            <div id="matchesContainer" class="grid grid-cols-1 gap-4">
+                <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 text-center text-slate-500">
+                    جاري تحميل المباريات...
+                </div>
+            </div>
+        </section>
+
+        <!-- قسم جدول الترتيب -->
+        <section class="bg-slate-900/80 backdrop-blur p-6 rounded-2xl border border-slate-800 shadow-xl">
+            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
+                <span>🏆</span> جدول الترتيب العام
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="w-full text-right border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400 text-xs">
+                            <th class="py-3 px-4"># المركز</th>
+                            <th class="py-3 px-4">المستخدم</th>
+                            <th class="py-3 px-4">النقاط</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTable" class="divide-y divide-slate-800/50 text-slate-200 text-sm">
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-slate-500">جاري تحميل الترتيب...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
     </div>
 
-    <div id="leaderboard-screen" class="screen">
-        <button class="btn-back" onclick="openScreen('main-screen')">← Back to Menu</button>
-        <h2 style="clear: both;">Global Leaderboard</h2>
-        <div style="background: rgba(15, 5, 29, 0.95); border-radius: 16px; border: 1px solid #560bad; padding: 20px;">
-            <p style="color: #4cc9f0;">Leaderboard logs are active on Telegram.</p>
-        </div>
-    </div>
-
-    <script>
-        let matchData = {};
-        let selectedTeamName = "";
-
-        // جلب بيانات المباراة من ملف match.json أوتوماتيكياً عند فتح الصفحة
-        async function loadMatch() {
-            try {
-                const response = await fetch('match.json');
-                matchData = await response.json();
-                
-                document.getElementById('home-name').innerText = matchData.homeTeam;
-                document.getElementById('home-logo').src = matchData.homeLogo;
-                document.getElementById('away-name').innerText = matchData.awayTeam;
-                document.getElementById('away-logo').src = matchData.awayLogo;
-
-                // تحديث نصوص أزرار المراهنة بأسماء الفرق الحقيقية
-                document.getElementById('btn-home').innerHTML = `${matchData.homeTeam} <span>Home</span>`;
-                document.getElementById('btn-away').innerHTML = `${matchData.awayTeam} <span>Away</span>`;
-
-                // تفعيل عداد الـ Deadline بناءً على الوقت في الملف
-                setInterval(checkDeadline, 1000);
-            } catch (e) {
-                document.getElementById('deadline-status').innerText = "⚠️ Error loading match data.";
-            }
-        }
-
-        function checkDeadline() {
-            if (!matchData.matchTime) return;
-            const matchTime = new Date(matchData.matchTime).getTime();
-            const now = new Date().getTime();
-            const oneHourBeforeMatch = matchTime - (60 * 60 * 1000);
-            
-            const deadlineStatus = document.getElementById('deadline-status');
-            const oddsBox = document.getElementById('prediction-buttons-box');
-            const submitBtn = document.getElementById('submit-prediction-btn');
-
-            if (now >= oneHourBeforeMatch) {
-                deadlineStatus.innerText = "🔒 Predictions Closed (Deadline Passed)";
-                deadlineStatus.style.color = "#ff4d6d";
-                oddsBox.style.opacity = "0.4";
-                oddsBox.style.pointerEvents = "none";
-                submitBtn.disabled = true;
-                submitBtn.innerText = "Predictions Closed";
-            } else {
-                const timeLeftMinutes = Math.floor((oneHourBeforeMatch - now) / (1000 * 60));
-                deadlineStatus.innerText = `⏳ Closes in ${timeLeftMinutes} mins before kickoff.`;
-            }
-        }
-
-        loadMatch();
-
-        const usernameInput = document.getElementById('username-input');
-        const startBtn = document.getElementById('start-btn');
-        const welcomeScreen = document.getElementById('welcome-screen');
-        const mainScreen = document.getElementById('main-screen');
-        const userBadge = document.getElementById('user-badge');
-        const badgeId = document.getElementById('badge-id');
-        const userWelcomeName = document.getElementById('user-welcome-name');
-
-        usernameInput.addEventListener('input', () => {
-            if (usernameInput.value.trim().length > 0) {
-                startBtn.classList.add('active');
-                startBtn.disabled = false;
-            } else {
-                startBtn.classList.remove('active');
-                startBtn.disabled = true;
-            }
-        });
-
-        startBtn.addEventListener('click', () => {
-            const username = usernameInput.value.trim();
-            const userId = 'USR-' + Math.floor(1000 + Math.random() * 9000);
-            localStorage.setItem('user_name', username);
-            localStorage.setItem('user_id', userId);
-            welcomeScreen.classList.remove('active');
-            badgeId.innerText = userId;
-            userBadge.style.display = 'block';
-            userWelcomeName.innerText = username;
-            mainScreen.classList.add('active');
-        });
-
-        function openScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function selectWinner(type) {
-            if (type === 'Home') selectedTeamName = matchData.homeTeam;
-            if (type === 'Draw') selectedTeamName = "Draw (التعادل)";
-            if (type === 'Away') selectedTeamName = matchData.awayTeam;
-
-            document.querySelectorAll('.odd-btn').forEach(b => b.classList.remove('selected'));
-            if(type === 'Home') document.getElementById('btn-home').classList.add('selected');
-            if(type === 'Draw') document.getElementById('btn-draw').classList.add('selected');
-            if(type === 'Away') document.getElementById('btn-away').classList.add('selected');
-            
-            document.getElementById('submit-prediction-btn').disabled = false;
-        }
-
-        async function sendPredictionToTelegram() {
-            const username = localStorage.getItem('user_name');
-            const userId = localStorage.getItem('user_id');
-            const botToken = "8962813028:AAHCcjqTDn1yflaBBc_jFLtF4L2upP8fM-s";
-            const chatId = "6395704604";
-            
-            const message = `🎯 New Prediction!\n⚽ Match: ${matchData.homeTeam} vs ${matchData.awayTeam}\n👤 Player: ${username} (${userId})\n🔮 Picked: ${selectedTeamName}`;
-
-            try {
-                await fetch(`https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message)}`);
-                alert("Prediction sent successfully to Telegram!");
-                openScreen('main-screen');
-            } catch (e) {
-                alert("Failed to send prediction.");
-            }
-        }
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedName = localStorage.getItem('user_name');
-            const savedId = localStorage.getItem('user_id');
-            if (savedName && savedId) {
-                welcomeScreen.classList.remove('active');
-                badgeId.innerText = savedId;
-                userBadge.style.display = 'block';
-                userWelcomeName.innerText = savedName;
-                mainScreen.classList.add('active');
-            }
-        });
-    </script>
+    <!-- استدعاء الجافاسكريبت والـ Firebase SDK -->
+    <script type="module" src="app.js"></script>
 </body>
 </html>
