@@ -47,7 +47,7 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// 1. جلب المباريات مع تكبير اللوغوهات
+// 1. جلب المباريات مع تصحيح مسارات اللوغوهات وحمايتها
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     try {
@@ -66,13 +66,21 @@ async function loadMatches() {
             const matchTime = match.matchTime ? match.matchTime.toDate() : new Date();
             const isStarted = now >= matchTime;
 
+            // تنظيف الروابط من أي فراغات خفية قد تسبب مشاكل
+            const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
+            const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
+
             const card = document.createElement('div');
             card.className = "glass p-5 rounded-2xl space-y-4 shadow-xl border border-sky-500/20";
             card.innerHTML = `
                 <div class="flex items-center justify-between">
                     <!-- الفريق المضيف -->
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
-                        <img src="${match.homeLogo}" class="w-16 h-16 object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        <div class="relative z-10 w-16 h-16 flex items-center justify-center">
+                            <img src="${homeLogo}" 
+                                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'" 
+                                 class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        </div>
                         <span class="font-bold text-sm text-white">${match.homeTeam}</span>
                     </div>
 
@@ -86,7 +94,11 @@ async function loadMatches() {
 
                     <!-- الفريق الضيف -->
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
-                        <img src="${match.awayLogo}" class="w-16 h-16 object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        <div class="relative z-10 w-16 h-16 flex items-center justify-center">
+                            <img src="${awayLogo}" 
+                                 onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/a/ac/No_image_available.svg'" 
+                                 class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                        </div>
                         <span class="font-bold text-sm text-white">${match.awayTeam}</span>
                     </div>
                 </div>
