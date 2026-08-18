@@ -32,27 +32,38 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.6s ease, visibility 0.6s ease;
+            transition: visibility 0.4s ease;
         }
 
-        /* أنيميشن ظهور الحروف تباعاً (Letter by Letter Animation) */
+        /* أنيميشن الحروف: الهبوط من الفوق للتحت، ثم الخروج واحد ورا خوه */
         .letter-anim {
             display: inline-block;
             opacity: 0;
-            transform: translateY(20px);
-            animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(-40px);
+            animation: dropAndFade 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes popIn {
-            to {
+        @keyframes dropAndFade {
+            0% {
+                opacity: 0;
+                transform: translateY(-40px);
+            }
+            30% {
                 opacity: 1;
                 transform: translateY(0);
             }
+            70% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
         }
 
-        /* تأثير إخفاء شاشة الترحيب */
+        /* تأثير إخفاء شاشة الترحيب نهائياً بعد انتهاء الحروف */
         .fade-out {
-            opacity: 0;
             visibility: hidden;
         }
 
@@ -66,13 +77,13 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- شاشة الترحيب (Splash Screen) بحروف تظهر تباعاً ولمدة ثانيتين -->
+    <!-- شاشة الترحيب (Splash Screen) -->
     <div id="splashScreen">
-        <div class="text-center space-y-2">
+        <div class="text-center space-y-3">
             <h1 id="splashTitle" class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
-                <!-- سيتم ملء الحروف عبر الـ JavaScript لاحقاً بدقة -->
+                <!-- سيتم ملء الحروف عبر الـ JavaScript ديناميكياً -->
             </h1>
-            <p class="text-slate-400 text-xs md:text-sm tracking-widest uppercase opacity-0 animate-[fadeIn_0.8s_ease_0.8s_forwards]">
+            <p id="splashSubtitle" class="text-slate-400 text-xs md:text-sm tracking-widest uppercase opacity-0 transition-opacity duration-300">
                 Predict the matches, climb the global rank.
             </p>
         </div>
@@ -129,22 +140,29 @@
 
     </div>
 
-    <!-- سكربت توليد حروف العنوان وتوقيت إخفاء الشاشة (ثانيتين فقط) -->
+    <!-- سكربت الأنميشن بالحروف وتوقيت ثانيتين -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const titleText = "One League";
             const titleContainer = document.getElementById('splashTitle');
+            const subtitle = document.getElementById('splashSubtitle');
             
-            // تحويل كل حرف إلى span خاص به مع تأخير زمني تدريجي
+            // توليد الحروف مع تأخير متسلسل (واحد ورا خو) للهبوط والخروج
             titleText.split('').forEach((char, index) => {
                 const span = document.createElement('span');
-                span.textContent = char === ' ' ? '\u00A0' : char; // الحفاظ على المسافة بين الكلمتين
+                span.textContent = char === ' ' ? '\u00A0' : char;
                 span.className = 'letter-anim';
-                span.style.animationDelay = `${index * 0.06}s`; // تأخير متسلسل لكل حرف
+                // التأخير الزمني لكل حرف باش يهبطوا ويخرجوا بالترتيب
+                span.style.animationDelay = `${index * 0.05}s`;
                 titleContainer.appendChild(span);
             });
 
-            // إخفاء شاشة الترحيب بعد ثانيتين (2000 ميلي ثانية) بدقة
+            // إظهار النص التحتاني لفترة قصيرة جداً مع الحروف
+            setTimeout(() => {
+                subtitle.style.opacity = '1';
+            }, 300);
+
+            // إخفاء شاشة الترحيب تماماً بعد ثانيتين (2000 ميلي ثانية)
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 if (splash) {
