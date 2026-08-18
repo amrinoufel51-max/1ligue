@@ -1,83 +1,67 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>دوري التوقعات الرياضي</title>
-    <!-- Tailwind CSS CDN -->
+    <title>OneLeague | Predict & Win</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Cairo', sans-serif; }
+        /* الخلفية المتحركة */
+        body {
+            background: linear-gradient(-45deg, #0f172a, #1e293b, #020617, #0f172a);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+            font-family: 'Inter', sans-serif;
+        }
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .glass { background: rgba(15, 23, 42, 0.7); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+<body class="text-slate-100 min-h-screen p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto space-y-8">
         
-        <!-- الهيدر -->
-        <header class="text-center space-y-2">
-            <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
-                ⚡ دوري التوقعات
+        <header class="text-center space-y-2 animate-fade-in">
+            <h1 class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">
+                ONELEAGUE
             </h1>
-            <p class="text-slate-400 text-sm md:text-base">توقع، نافس، واثبت خبرتك الرياضية!</p>
+            <p class="text-slate-400">Predict the future, climb the leaderboard.</p>
         </header>
 
-        <!-- قسم إدخال وحفظ الـ ID الخاص بالمستخدم -->
-        <section class="bg-slate-900/80 backdrop-blur p-5 rounded-2xl border border-slate-800 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="w-full md:w-auto flex-1">
-                <label class="block text-xs text-slate-400 mb-1">اسمك أو معرف المستخدم (ID)</label>
-                <div class="flex gap-2">
-                    <input type="text" id="currentUserId" placeholder="مثال: Karim_DZ" 
-                        class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 font-bold transition">
-                    <button id="saveIdBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-5 py-2.5 rounded-xl font-bold text-xs transition">
-                        حفظ الـ ID 💾
-                    </button>
-                </div>
-            </div>
-            <div class="text-xs text-slate-400 text-center md:text-right">
-                💡 <span class="text-emerald-400">تنبيه:</span> يتم قفل التوقعات تلقائياً بمجرد انطلاق المباراة (Deadline).
+        <!-- User ID Section -->
+        <section class="glass p-6 rounded-3xl border border-slate-700/50 shadow-2xl">
+            <label class="block text-xs uppercase tracking-widest text-slate-500 mb-2">Player Tag</label>
+            <div class="flex gap-2">
+                <input type="text" id="currentUserId" placeholder="Enter your ID" 
+                    class="w-full bg-slate-950/50 border border-slate-700 rounded-2xl px-4 py-3 focus:border-emerald-500 outline-none transition">
+                <button id="saveIdBtn" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-6 py-3 rounded-2xl font-bold transition">Save</button>
             </div>
         </section>
 
-        <!-- قسم المباريات المتاحة للتوقع -->
+        <!-- Matches -->
         <section class="space-y-4">
-            <h2 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
-                <span>⚽</span> مباريات اليوم والتوقعات
-            </h2>
-            <div id="matchesContainer" class="grid grid-cols-1 gap-4">
-                <div class="bg-slate-900/60 p-6 rounded-2xl border border-slate-800 text-center text-slate-500">
-                    جاري تحميل المباريات...
-                </div>
-            </div>
+            <h2 class="text-xl font-bold text-emerald-400">Upcoming Matches</h2>
+            <div id="matchesContainer" class="grid gap-4"></div>
         </section>
 
-        <!-- قسم جدول الترتيب -->
-        <section class="bg-slate-900/80 backdrop-blur p-6 rounded-2xl border border-slate-800 shadow-xl">
-            <h2 class="text-xl font-bold text-emerald-400 mb-4 flex items-center gap-2">
-                <span>🏆</span> جدول الترتيب العام
-            </h2>
-            <div class="overflow-x-auto">
-                <table class="w-full text-right border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-800 text-slate-400 text-xs">
-                            <th class="py-3 px-4"># المركز</th>
-                            <th class="py-3 px-4">المستخدم</th>
-                            <th class="py-3 px-4">النقاط</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboardTable" class="divide-y divide-slate-800/50 text-slate-200 text-sm">
-                        <tr>
-                            <td colspan="3" class="text-center py-4 text-slate-500">جاري تحميل الترتيب...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+        <!-- Leaderboard -->
+        <section class="glass p-6 rounded-3xl border border-slate-700/50 shadow-2xl">
+            <h2 class="text-xl font-bold text-emerald-400 mb-4">Global Rankings</h2>
+            <table class="w-full text-left">
+                <thead><tr class="text-slate-500 text-xs uppercase">
+                    <th class="py-3">#</th>
+                    <th class="py-3">Player</th>
+                    <th class="py-3 text-right">Points</th>
+                </tr></thead>
+                <tbody id="leaderboardTable" class="divide-y divide-slate-800"></tbody>
+            </table>
         </section>
-
     </div>
 
-    <!-- استدعاء الجافاسكريبت والـ Firebase SDK -->
     <script type="module" src="app.js"></script>
 </body>
 </html>
