@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم الآدمن - دوري التوقعات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Cairo', sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-8">
+
+    <div class="max-w-2xl mx-auto space-y-6">
+        <header class="text-center space-y-2">
+            <h1 class="text-3xl font-black text-rose-500">⚙️ لوحة تحكم الآدمن</h1>
+            <p class="text-slate-400 text-sm">حدد النتيجة الحقيقية للمباراة واحسب النقاط أوتوماتيكياً</p>
+        </header>
+
+        <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">اختر المباراة:</label>
+                <select id="adminMatchSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 font-bold">
+                    <option value="">جاري تحميل المباريات...</option>
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">النتيجة الحقيقية (الـ 1X2):</label>
+                <select id="realResult" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 font-bold">
+                    <option value="1">فوز الفريق المضيف (1)</option>
+                    <option value="X">تعادل (X)</option>
+                    <option value="2">فوز الفريق الضيف (2)</option>
+                </select>
+            </div>
+
+            <button id="calculateBtn" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3.5 rounded-xl transition shadow-lg">
+                حساب وتوزيع النقاط على المشاركين 🚀
+            </button>
+            <p id="adminMsg" class="text-center text-sm font-semibold"></p>
+        </section>
+    </div>
+
+    <!-- كود الآدمن البرمجي -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // نفس إعدادات فايبربيس تاعك
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
+            authDomain: "league-91565.firebaseapp.com",
+            projectId: "league-91565",
+            storageBucket: "league-91565.firebasestorage.app",
+            messagingSenderId: "923003244062",
+            appId: "1:923003244062:web:a2bf91b86de0d1bf73a80f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const matchSelect = document.getElementById('adminMatchSelect');
+        const calculateBtn = document.getElementById('calculateBtn');
+        const adminMsg = document.getElementById('adminMsg');
+
+        // جلب المباريات لليستة الاختيار
+        async function loadAdminMatches() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "matches"));
+                matchSelect.innerHTML = "";
+                querySnapshot.forEach(docSnap => {
+                    const match = docSnap.data();
+                    const opt = document.createElement('option');
+                    opt.value = docSnap.id;
+                    opt.textContent = `${match.homeTeam} VS ${match.awayTeam}`;
+                    matchSelect.appendChild(opt);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+        loadAdminMatches();
+
+        // زر حساب النقاط
+        calculateBtn.onclick = async () => {
+            const matchId = matchSelect.value;
+            const correctResult = document.getElementById('realResult').value;
+
+            if (!matchId) {
+                alert("اختر مباراة أولاً!");
+                return;
+            }
+
+            adminMsg.textContent = "جاري حساب وتوزيع النقاط...";
+            adminMsg.className = "text-center text-sm font-semibold text-amber-400";
+
+            try {
+                // 1. جلب كل التوقعات الخاصة بهذه المباراة فقط
+                const predsSnapshot = await getDocs(collection(db, "predictions"));
+                
+                let updatedCount = 0;
+                for (const predDoc of predsSnapshot.docs) {
+                    const data = predDoc.data();
+                    
+                    if (data.matchId === matchId) {
+                        const userId = data.userId;
+                        const userPred = data.prediction;
+
+                        // إذا كان توقع المستخدم مطابق للنتيجة الحقيقية (نعطيه مثلاً 3 نقاط)
+                        if (userPred === correctResult) {
+                            const userRef = doc(db, "leaderboard", userId);
+                            const userSnap = await getDoc(userRef);
+
+                            if (userSnap.exists()) {
+                                // إضافة 3 نقاط لرصيده الحالي
+                                const currentPoints = userSnap.data().totalPoints || 0;
+                                await updateDoc(userRef, {
+                                    totalPoints: currentPoints + 3
+                                });
+                            } else {
+                                // إذا لم يكن موجوداً في جدول الترتيب لأي سبب
+                                await setDoc(userRef, {
+                                    userId: userId,
+                                    totalPoints: 3
+                                });
+                            }
+                            updatedCount++;
+                        }
+                    }
+                }
+
+                adminMsg.textContent = `✅ تمت العملية بنجاح! تم تحديث نقاط الفائزين (${updatedCount} مستخدم).`;
+                adminMsg.className = "text-center text-sm font-semibold text-emerald-400";
+            } catch (error) {
+                console.error(error);
+                adminMsg.textContent = "❌ حدث خطأ أثناء توزيع النقاط.";
+                adminMsg.className = "text-center text-sm font-semibold text-rose-400";
+            }
+        };
+    </script>
+</body>
+</html>
