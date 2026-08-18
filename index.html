@@ -32,39 +32,15 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: visibility 0.4s ease;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
         }
 
-        /* أنيميشن الحروف: الهبوط من الفوق للتحت، ثم الخروج واحد ورا خوه */
-        .letter-anim {
+        /* تصميم الحرف الافتراضي قبل الأنيميشن */
+        .splash-letter {
             display: inline-block;
             opacity: 0;
-            transform: translateY(-40px);
-            animation: dropAndFade 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        @keyframes dropAndFade {
-            0% {
-                opacity: 0;
-                transform: translateY(-40px);
-            }
-            30% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            70% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-        }
-
-        /* تأثير إخفاء شاشة الترحيب نهائياً بعد انتهاء الحروف */
-        .fade-out {
-            visibility: hidden;
+            transform: translateY(-50px);
+            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         /* تصميم الزجاج العصري (Glassmorphism) */
@@ -83,7 +59,7 @@
             <h1 id="splashTitle" class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
                 <!-- سيتم ملء الحروف عبر الـ JavaScript ديناميكياً -->
             </h1>
-            <p id="splashSubtitle" class="text-slate-400 text-xs md:text-sm tracking-widest uppercase opacity-0 transition-opacity duration-300">
+            <p id="splashSubtitle" class="text-slate-400 text-xs md:text-sm tracking-widest uppercase opacity-0 transition-opacity duration-500">
                 Predict the matches, climb the global rank.
             </p>
         </div>
@@ -140,35 +116,55 @@
 
     </div>
 
-    <!-- سكربت الأنميشن بالحروف وتوقيت ثانيتين -->
+    <!-- سكربت الأنميشن الدقيق -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const titleText = "One League";
             const titleContainer = document.getElementById('splashTitle');
             const subtitle = document.getElementById('splashSubtitle');
+            const splashScreen = document.getElementById('splashScreen');
             
-            // توليد الحروف مع تأخير متسلسل (واحد ورا خو) للهبوط والخروج
-            titleText.split('').forEach((char, index) => {
+            const letterSpans = [];
+
+            // 1. توليد الحروف
+            titleText.split('').forEach((char) => {
                 const span = document.createElement('span');
                 span.textContent = char === ' ' ? '\u00A0' : char;
-                span.className = 'letter-anim';
-                // التأخير الزمني لكل حرف باش يهبطوا ويخرجوا بالترتيب
-                span.style.animationDelay = `${index * 0.05}s`;
+                span.className = 'splash-letter';
                 titleContainer.appendChild(span);
+                letterSpans.push(span);
             });
 
-            // إظهار النص التحتاني لفترة قصيرة جداً مع الحروف
+            // 2. هبوط الحروف واحد ورا خوه من الفوق للتحت
+            letterSpans.forEach((span, index) => {
+                setTimeout(() => {
+                    span.style.opacity = '1';
+                    span.style.transform = 'translateY(0)';
+                }, index * 60); // تتابع بين الحروف
+            });
+
+            // إظهار الوصف التحتاني معها
             setTimeout(() => {
                 subtitle.style.opacity = '1';
-            }, 300);
+            }, 400);
 
-            // إخفاء شاشة الترحيب تماماً بعد ثانيتين (2000 ميلي ثانية)
+            // 3. بعد ثانيتين (2000ms)، الحروف تختفي واحد ورا خوه للتحت، ثم تختفي الشاشة
             setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                if (splash) {
-                    splash.classList.add('fade-out');
-                }
-            }, 2000);
+                letterSpans.forEach((span, index) => {
+                    setTimeout(() => {
+                        span.style.opacity = '0';
+                        span.style.transform = 'translateY(40px)';
+                    }, index * 50);
+                });
+                subtitle.style.opacity = '0';
+
+                // إزالة شاشة الترحيب كلياً بعد إتمام اختفاء الحروف
+                setTimeout(() => {
+                    splashScreen.style.opacity = '0';
+                    splashScreen.style.visibility = 'hidden';
+                }, 600);
+
+            }, 2000); // إجمالي مدة العرض ثانيتين
         });
     </script>
 
