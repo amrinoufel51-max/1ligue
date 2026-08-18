@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OneLeague | Predict & Win</title>
+    <title>One League | Predict & Win</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* الخلفية المتحركة بالأسود والأزرق والتموجات */
@@ -32,17 +32,28 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
         }
 
-        /* أنيميشن نزول العنوان من الفوق للتحت */
-        .reveal-text {
-            animation: dropDown 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        /* أنيميشن ظهور الحروف تباعاً (Letter by Letter Animation) */
+        .letter-anim {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        @keyframes dropDown {
-            from { opacity: 0; transform: translateY(-60px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* تأثير إخفاء شاشة الترحيب */
+        .fade-out {
+            opacity: 0;
+            visibility: hidden;
         }
 
         /* تصميم الزجاج العصري (Glassmorphism) */
@@ -51,33 +62,29 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
-
-        /* تأثير إخفاء شاشة الترحيب */
-        .fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
     </style>
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- شاشة الترحيب (Splash Screen) -->
+    <!-- شاشة الترحيب (Splash Screen) بحروف تظهر تباعاً ولمدة ثانيتين -->
     <div id="splashScreen">
-        <div class="reveal-text text-center">
-            <h1 class="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
-                ONELEAGUE
+        <div class="text-center space-y-2">
+            <h1 id="splashTitle" class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
+                <!-- سيتم ملء الحروف عبر الـ JavaScript لاحقاً بدقة -->
             </h1>
-            <p class="text-slate-400 text-sm mt-2 tracking-widest uppercase">Predict the matches, climb the global rank.</p>
+            <p class="text-slate-400 text-xs md:text-sm tracking-widest uppercase opacity-0 animate-[fadeIn_0.8s_ease_0.8s_forwards]">
+                Predict the matches, climb the global rank.
+            </p>
         </div>
     </div>
 
     <!-- محتوى الموقع الأساسي -->
     <div class="max-w-3xl mx-auto space-y-6">
         
-        <!-- العنوان الصغير داخل الموقع مع إمكانية عمل Refresh عند الضغط عليه -->
+        <!-- العنوان الرئيسي داخل الموقع مع إمكانية عمل Refresh عند الضغط عليه -->
         <div class="text-center py-6">
             <h1 onclick="location.reload()" class="cursor-pointer inline-block text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider hover:opacity-80 transition select-none" title="Click to Refresh">
-                ONELEAGUE
+                One League
             </h1>
             <p class="text-slate-400 text-xs mt-1">Predict the matches, climb the global rank.</p>
         </div>
@@ -122,15 +129,28 @@
 
     </div>
 
-    <!-- سكربت التحكم في ظهور واختفاء شاشة الترحيب بعد 3 ثواني -->
+    <!-- سكربت توليد حروف العنوان وتوقيت إخفاء الشاشة (ثانيتين فقط) -->
     <script>
-        window.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', () => {
+            const titleText = "One League";
+            const titleContainer = document.getElementById('splashTitle');
+            
+            // تحويل كل حرف إلى span خاص به مع تأخير زمني تدريجي
+            titleText.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char === ' ' ? '\u00A0' : char; // الحفاظ على المسافة بين الكلمتين
+                span.className = 'letter-anim';
+                span.style.animationDelay = `${index * 0.06}s`; // تأخير متسلسل لكل حرف
+                titleContainer.appendChild(span);
+            });
+
+            // إخفاء شاشة الترحيب بعد ثانيتين (2000 ميلي ثانية) بدقة
             setTimeout(() => {
                 const splash = document.getElementById('splashScreen');
                 if (splash) {
                     splash.classList.add('fade-out');
                 }
-            }, 3000); // 3000 ملي ثانية = 3 ثواني
+            }, 2000);
         });
     </script>
 
