@@ -13,10 +13,33 @@
     <div class="max-w-2xl mx-auto space-y-6">
         <header class="text-center space-y-2">
             <h1 class="text-3xl font-black text-rose-500">⚙️ لوحة تحكم الآدمن</h1>
-            <p class="text-slate-400 text-sm">حدد النتيجة الحقيقية للمباراة واحسب النقاط أوتوماتيكياً</p>
+            <p class="text-slate-400 text-sm">تحكم في قفل المباريات، حدد النتيجة، واحسب النقاط أوتوماتيكياً</p>
         </header>
 
+        <!-- قسم التحكم في قفل أو فتح التوقعات للمباريات -->
         <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-amber-400">🔒 قفل وفتح التوقعات يدوياً</h2>
+            <div>
+                <label class="block text-sm text-slate-300 mb-2">اختر المباراة للقفل أو الفتح:</label>
+                <select id="adminLockMatchSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-amber-500 font-bold">
+                    <option value="">جاري تحميل المباريات...</option>
+                </select>
+            </div>
+
+            <div class="flex gap-3">
+                <button id="lockBtn" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition shadow-lg">
+                    🔒 قفل التوقعات (إيقاف)
+                </button>
+                <button id="unlockBtn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
+                    🔓 فتح التوقعات (تشغيل)
+                </button>
+            </div>
+            <p id="lockMsg" class="text-center text-sm font-semibold"></p>
+        </section>
+
+        <!-- قسم حساب وتوزيع النقاط -->
+        <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-rose-400">🏆 حساب النتائج وتوزيع النقاط</h2>
             <div>
                 <label class="block text-sm text-slate-300 mb-2">اختر المباراة:</label>
                 <select id="adminMatchSelect" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-rose-500 font-bold">
@@ -43,9 +66,8 @@
     <!-- كود الآدمن البرمجي -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // نفس إعدادات فايبربيس تاعك
         const firebaseConfig = {
             apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
             authDomain: "league-91565.firebaseapp.com",
@@ -59,26 +81,75 @@
         const db = getFirestore(app);
 
         const matchSelect = document.getElementById('adminMatchSelect');
+        const lockMatchSelect = document.getElementById('adminLockMatchSelect');
         const calculateBtn = document.getElementById('calculateBtn');
+        const lockBtn = document.getElementById('lockBtn');
+        const unlockBtn = document.getElementById('unlockBtn');
         const adminMsg = document.getElementById('adminMsg');
+        const lockMsg = document.getElementById('lockMsg');
 
-        // جلب المباريات لليستة الاختيار
+        // جلب المباريات للقوائم
         async function loadAdminMatches() {
             try {
                 const querySnapshot = await getDocs(collection(db, "matches"));
                 matchSelect.innerHTML = "";
+                lockMatchSelect.innerHTML = "";
+
                 querySnapshot.forEach(docSnap => {
                     const match = docSnap.data();
-                    const opt = document.createElement('option');
-                    opt.value = docSnap.id;
-                    opt.textContent = `${match.homeTeam} VS ${match.awayTeam}`;
-                    matchSelect.appendChild(opt);
+                    const matchText = `${match.homeTeam} VS ${match.awayTeam} ${match.isLocked ? '🔒 (مغلقة)' : '🔓 (مفتوحة)'}`;
+                    
+                    // لقائمة حساب النقاط
+                    const opt1 = document.createElement('option');
+                    opt1.value = docSnap.id;
+                    opt1.textContent = `${match.homeTeam} VS ${match.awayTeam}`;
+                    matchSelect.appendChild(opt1);
+
+                    // لقائمة قفل/فتح التوقعات
+                    const opt2 = document.createElement('option');
+                    opt2.value = docSnap.id;
+                    opt2.textContent = matchText;
+                    lockMatchSelect.appendChild(opt2);
                 });
             } catch (e) {
                 console.error(e);
             }
         }
         loadAdminMatches();
+
+        // زر قفل التوقعات يدوياً
+        lockBtn.onclick = async () => {
+            const matchId = lockMatchSelect.value;
+            if (!matchId) { alert("اختر مباراة أولاً!"); return; }
+
+            try {
+                await updateDoc(doc(db, "matches", matchId), { isLocked: true });
+                lockMsg.textContent = "🔒 تم قفل التوقعات لهذه المباراة بنجاح!";
+                lockMsg.className = "text-center text-sm font-semibold text-amber-400";
+                loadAdminMatches();
+            } catch (e) {
+                console.error(e);
+                lockMsg.textContent = "❌ حدث خطأ أثناء قفل المباراة.";
+                lockMsg.className = "text-center text-sm font-semibold text-rose-400";
+            }
+        };
+
+        // زر فتح التوقعات يدوياً
+        unlockBtn.onclick = async () => {
+            const matchId = lockMatchSelect.value;
+            if (!matchId) { alert("اختر مباراة أولاً!"); return; }
+
+            try {
+                await updateDoc(doc(db, "matches", matchId), { isLocked: false });
+                lockMsg.textContent = "🔓 تم فتح التوقعات لهذه المباراة بنجاح!";
+                lockMsg.className = "text-center text-sm font-semibold text-emerald-400";
+                loadAdminMatches();
+            } catch (e) {
+                console.error(e);
+                lockMsg.textContent = "❌ حدث خطأ أثناء فتح المباراة.";
+                lockMsg.className = "text-center text-sm font-semibold text-rose-400";
+            }
+        };
 
         // زر حساب النقاط
         calculateBtn.onclick = async () => {
@@ -94,10 +165,9 @@
             adminMsg.className = "text-center text-sm font-semibold text-amber-400";
 
             try {
-                // 1. جلب كل التوقعات الخاصة بهذه المباراة فقط
                 const predsSnapshot = await getDocs(collection(db, "predictions"));
-                
                 let updatedCount = 0;
+
                 for (const predDoc of predsSnapshot.docs) {
                     const data = predDoc.data();
                     
@@ -105,19 +175,16 @@
                         const userId = data.userId;
                         const userPred = data.prediction;
 
-                        // إذا كان توقع المستخدم مطابق للنتيجة الحقيقية (نعطيه مثلاً 3 نقاط)
                         if (userPred === correctResult) {
                             const userRef = doc(db, "leaderboard", userId);
                             const userSnap = await getDoc(userRef);
 
                             if (userSnap.exists()) {
-                                // إضافة 3 نقاط لرصيده الحالي
                                 const currentPoints = userSnap.data().totalPoints || 0;
                                 await updateDoc(userRef, {
                                     totalPoints: currentPoints + 3
                                 });
                             } else {
-                                // إذا لم يكن موجوداً في جدول الترتيب لأي سبب
                                 await setDoc(userRef, {
                                     userId: userId,
                                     totalPoints: 3
