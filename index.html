@@ -77,7 +77,6 @@
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
 
-        /* تنسيق القائمة الجانبية (Sidebar) */
         #sidebar {
             transition: transform 0.3s ease-in-out;
         }
@@ -96,7 +95,7 @@
         </div>
     </div>
 
-    <!-- زر فتح القائمة الجانبية في أعلى الشاشة -->
+    <!-- Top Menu Button -->
     <div class="max-w-3xl mx-auto flex justify-between items-center mb-2">
         <button id="openSidebarBtn" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-sm flex items-center gap-2 transition shadow-lg">
             <span>☰</span> Menu
@@ -104,7 +103,7 @@
         <div class="text-xs text-slate-500">One League v2.0</div>
     </div>
 
-    <!-- القائمة الجانبية (Sidebar Drawer) -->
+    <!-- Sidebar Drawer -->
     <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
     <div id="sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-800 z-50 p-6 flex flex-col justify-between shadow-2xl transform translate-x-full">
         <div class="space-y-6">
@@ -142,7 +141,7 @@
                 <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm leading-relaxed">
-                **One League** هو منصة تفاعلية مصممة خصيصاً لعشاق كرة القدم لتوقع نتائج المباريات وتحدي الأصدقاء. هدفنا هو خلق مجتمع تنافسي ممتع يختبر خبرتك الكروية ويرتقي بك إلى قمة الترتيب العالمي.
+                **One League** is an interactive platform custom-built for football enthusiasts to predict match results and challenge friends. Our goal is to create an engaging competitive community that tests your football knowledge and elevates you to the top of the global leaderboard.
             </p>
             <button onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -156,7 +155,7 @@
                 <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm leading-relaxed">
-                نحن نحترم خصوصيتك بشكل كامل. البيانات التي نقوم بجمعها تقتصر فقط على المعرف الفريد (ID) ورقم الهاتف أو البريد الإلكتروني الذي تدخله، وهي تُستخدم حصرياً لتسجيل توقعاتك والتواصل معك في حال فوزك بالجوائز. لا نشارك بياناتك أبداً مع أي طرف ثالث.
+                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and the contact details (phone number or email) you provide, which are used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
             </p>
             <button onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -170,7 +169,7 @@
                 <button onclick="closeModal('contactModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm">
-                إذا كان لديك أي استفسار، مشكلة تقنية، أو ترغب في التواصل معنا بخصوص الجوائز، يمكنك مراسلتنا أو الاتصال بنا مباشرة عبر الرقم التالي:
+                If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via the number below:
             </p>
             <div class="bg-slate-950/80 border border-sky-500/40 p-4 rounded-xl text-center">
                 <span class="text-xs text-slate-400 block mb-1">WhatsApp / Phone Number</span>
@@ -180,7 +179,7 @@
         </div>
     </div>
 
-    <!-- محتوى الموقع الأساسي -->
+    <!-- Main Content -->
     <div class="max-w-3xl mx-auto space-y-6">
         
         <div class="text-center py-4">
@@ -225,7 +224,7 @@
 
     </div>
 
-    <!-- سكربت التحكم في فتح وغلق القائمة الجانبية والنوافذ المنبثقة -->
+    <!-- Sidebar & Modals Script -->
     <script>
         const sidebar = document.getElementById('sidebar');
         const sidebarOverlay = document.getElementById('sidebarOverlay');
