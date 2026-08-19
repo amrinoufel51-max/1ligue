@@ -18,6 +18,9 @@ const userContactInput = document.getElementById('userContact');
 const contactContainer = document.getElementById('contactContainer');
 const saveIdBtn = document.getElementById('saveIdBtn');
 
+// متغير لتحديد نوع الترتيب الحالي ('global' أو 'monthly')
+let currentRankType = 'global';
+
 window.addEventListener('DOMContentLoaded', () => {
     const savedId = localStorage.getItem('prediction_user_id');
     const savedContact = localStorage.getItem('prediction_user_contact');
@@ -26,7 +29,6 @@ window.addEventListener('DOMContentLoaded', () => {
         userIdInput.value = savedId;
         userIdInput.disabled = true;
         
-        // إذا كان مسجلاً من قبل، نخفي خانة الاتصال تماماً من الواجهة
         if (contactContainer) {
             contactContainer.style.display = 'none';
         }
@@ -37,15 +39,30 @@ window.addEventListener('DOMContentLoaded', () => {
     loadLeaderboard();
 });
 
+// دالة عالمية للتبديل بين الترتيب العام وترتيب الشهر ليتم استدعاؤها من index.html
+window.showRank = function(type) {
+    currentRankType = type;
+    const globalBtn = document.getElementById('globalRankBtn');
+    const monthlyBtn = document.getElementById('monthlyRankBtn');
+
+    if (type === 'global') {
+        globalBtn.className = "flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition";
+        monthlyBtn.className = "flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition";
+    } else {
+        monthlyBtn.className = "flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition";
+        globalBtn.className = "flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition";
+    }
+
+    loadLeaderboard();
+};
+
 // زر الحفظ
 saveIdBtn.addEventListener('click', () => {
     if (userIdInput.disabled) {
-        // إذا أراد فك القفل وتغيير الـ ID (نعيد إظهار خانة الاتصال لو أردت أو نتركها مخفية ونكتفي بالـ ID)
         userIdInput.disabled = false;
         userIdInput.focus();
         saveIdBtn.textContent = "Save Identity 💾";
         localStorage.removeItem('prediction_user_id');
-        // ملاحظة: لا نحذف رقم الهاتف من الذاكرة لكي يبقى مسجلاً في القاعدة
     } else {
         const userId = userIdInput.value.trim();
         const userContact = userContactInput.value.trim();
@@ -85,7 +102,6 @@ async function checkAndSaveUser(userId, userContact) {
         
         userIdInput.disabled = true;
         
-        // بمجرد الحفظ الناجح، نقوم بإخفاء خانة الاتصال بتأثير مرن وانسيابي
         if (contactContainer) {
             contactContainer.style.display = 'none';
         }
@@ -93,17 +109,20 @@ async function checkAndSaveUser(userId, userContact) {
         saveIdBtn.textContent = "Identity Locked 🔒 (Change ID)";
 
         let currentPoints = 0;
+        let currentMonthlyPoints = 0;
         let creationTime = new Date().getTime();
 
         if (userSnap.exists()) {
             currentPoints = userSnap.data().totalPoints || 0;
+            currentMonthlyPoints = userSnap.data().monthlyPoints || 0;
             creationTime = userSnap.data().createdAt || creationTime; 
         }
 
         await setDoc(userRef, { 
             userId: userId, 
-            contact: userContact, // يُحفظ في قاعدة البيانات في الخلفية
+            contact: userContact,
             totalPoints: currentPoints,
+            monthlyPoints: currentMonthlyPoints,
             createdAt: creationTime 
         }, { merge: true });
 
@@ -132,7 +151,6 @@ async function loadMatches() {
             const match = docSnap.data();
             const matchId = docSnap.id;
             
-            // الاعتماد كلياً على زر القفل اليدوي من الآدمن (isLocked)
             const isLocked = match.isLocked === true;
 
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
@@ -178,7 +196,6 @@ async function loadMatches() {
                 btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${isLocked ? 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
                 btn.textContent = opt.l;
                 
-                // إذا كانت مغلقة يدوياً من الآدمن، نمنع الضغط نهائياً
                 if (!isLocked) {
                     btn.onclick = () => submitPrediction(matchId, opt.v, btn);
                 }
@@ -209,7 +226,7 @@ async function submitPrediction(matchId, choice, btnElement) {
         const userRef = doc(db, "leaderboard", userId);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
-            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, createdAt: new Date().getTime() });
+            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, monthlyPoints: 0, createdAt: new Date().getTime() });
         }
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.replace('bg-sky-600', 'bg-slate-900'));
@@ -220,7 +237,7 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب مع نظام كسر التعادل
+// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
@@ -240,9 +257,10 @@ async function loadLeaderboard() {
             players.push(docSnap.data());
         });
 
+        // الترتيب حسب النوع المحدد (Global أو Monthly)
         players.sort((a, b) => {
-            const pointsA = a.totalPoints || 0;
-            const pointsB = b.totalPoints || 0;
+            const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
+            const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
 
             if (pointsB !== pointsA) {
                 return pointsB - pointsA; 
@@ -265,11 +283,13 @@ async function loadLeaderboard() {
                 myRank = rank;
             }
 
+            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
+
             tableHtml += `
                 <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
                     <td class="py-2.5 px-2">#${rank}</td>
                     <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
-                    <td class="py-2.5 px-2 text-right text-cyan-400">${data.totalPoints || 0} pts</td>
+                    <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
                 </tr>`;
             rank++;
         });
@@ -279,19 +299,22 @@ async function loadLeaderboard() {
         if (myCardContainer) {
             if (currentUserId) {
                 if (myData) {
+                    const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                    const rankTitle = currentRankType === 'global' ? 'Overall Top 3 Rank' : 'Manager of the Month Rank';
+
                     myCardContainer.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">
                                 #${myRank}
                             </div>
                             <div>
-                                <div class="text-xs text-sky-300 font-semibold">Your Rank & Stats</div>
+                                <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
                                 <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">Total Points</div>
-                            <div class="text-lg font-black text-cyan-400">${myData.totalPoints || 0} pts</div>
+                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? 'Total Points' : 'Monthly Points'}</div>
+                            <div class="text-lg font-black text-cyan-400">${myPts} pts</div>
                         </div>
                     `;
                 } else {
@@ -313,4 +336,4 @@ async function loadLeaderboard() {
     } catch (e) { 
         console.error(e); 
     }
-} 
+}
