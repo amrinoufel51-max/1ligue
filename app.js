@@ -15,6 +15,7 @@ const db = getFirestore(app);
 
 const userIdInput = document.getElementById('currentUserId');
 const userContactInput = document.getElementById('userContact');
+const contactContainer = document.getElementById('contactContainer');
 const saveIdBtn = document.getElementById('saveIdBtn');
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -24,11 +25,13 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedId) {
         userIdInput.value = savedId;
         userIdInput.disabled = true;
-        if (savedContact) {
-            userContactInput.value = savedContact;
-            userContactInput.disabled = true;
+        
+        // إذا كان مسجلاً من قبل، نخفي خانة الاتصال تماماً من الواجهة
+        if (contactContainer) {
+            contactContainer.style.display = 'none';
         }
-        saveIdBtn.textContent = "Identity Locked 🔒 (Change)";
+
+        saveIdBtn.textContent = "Identity Locked 🔒 (Change ID)";
     }
     loadMatches();
     loadLeaderboard();
@@ -37,12 +40,12 @@ window.addEventListener('DOMContentLoaded', () => {
 // زر الحفظ
 saveIdBtn.addEventListener('click', () => {
     if (userIdInput.disabled) {
+        // إذا أراد فك القفل وتغيير الـ ID (نعيد إظهار خانة الاتصال لو أردت أو نتركها مخفية ونكتفي بالـ ID)
         userIdInput.disabled = false;
-        userContactInput.disabled = false;
         userIdInput.focus();
-        saveIdBtn.textContent = "Save Identity & Contact 💾";
+        saveIdBtn.textContent = "Save Identity 💾";
         localStorage.removeItem('prediction_user_id');
-        localStorage.removeItem('prediction_user_contact');
+        // ملاحظة: لا نحذف رقم الهاتف من الذاكرة لكي يبقى مسجلاً في القاعدة
     } else {
         const userId = userIdInput.value.trim();
         const userContact = userContactInput.value.trim();
@@ -53,7 +56,7 @@ saveIdBtn.addEventListener('click', () => {
             return;
         }
         if (!userContact) {
-            alert("⚠️ Please enter your phone number or email!");
+            alert("⚠️ Please enter your phone number or email so we can contact you if you win!");
             userContactInput.focus();
             return;
         }
@@ -62,7 +65,7 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// حفظ بيانات المستخدم مع توقيت التسجيل
+// حفظ البيانات في قاعدة البيانات
 async function checkAndSaveUser(userId, userContact) {
     try {
         const userRef = doc(db, "leaderboard", userId);
@@ -79,28 +82,32 @@ async function checkAndSaveUser(userId, userContact) {
 
         localStorage.setItem('prediction_user_id', userId);
         localStorage.setItem('prediction_user_contact', userContact);
+        
         userIdInput.disabled = true;
-        userContactInput.disabled = true;
-        saveIdBtn.textContent = "Identity Locked 🔒 (Change)";
+        
+        // بمجرد الحفظ الناجح، نقوم بإخفاء خانة الاتصال بتأثير مرن وانسيابي
+        if (contactContainer) {
+            contactContainer.style.display = 'none';
+        }
+        
+        saveIdBtn.textContent = "Identity Locked 🔒 (Change ID)";
 
-        // جلب البيانات القديمة لتفادي الكتابة فوقها، أو إنشاء بيانات جديدة مع وقت التسجيل
         let currentPoints = 0;
-        let creationTime = new Date().getTime(); // تسجيل الوقت الحالي
+        let creationTime = new Date().getTime();
 
         if (userSnap.exists()) {
             currentPoints = userSnap.data().totalPoints || 0;
-            // إذا كان مسجلاً من قبل، نحتفظ بوقته القديم
             creationTime = userSnap.data().createdAt || creationTime; 
         }
 
         await setDoc(userRef, { 
             userId: userId, 
-            contact: userContact, 
+            contact: userContact, // يُحفظ في قاعدة البيانات في الخلفية
             totalPoints: currentPoints,
             createdAt: creationTime 
         }, { merge: true });
 
-        alert("✅ Identity & Contact saved successfully!");
+        alert("✅ Identity saved successfully! Your contact details are securely registered.");
         loadLeaderboard();
 
     } catch (e) {
@@ -109,7 +116,7 @@ async function checkAndSaveUser(userId, userContact) {
     }
 }
 
-// 1. جلب المباريات
+// 1. جلب المباريات مع تفقد القفل اليدوي من الآدمن (isLocked)
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     try {
@@ -121,12 +128,12 @@ async function loadMatches() {
             return;
         }
 
-        const now = new Date();
         querySnapshot.forEach((docSnap) => {
             const match = docSnap.data();
             const matchId = docSnap.id;
-            const matchTime = match.matchTime ? match.matchTime.toDate() : new Date();
-            const isStarted = now >= matchTime;
+            
+            // الاعتماد كلياً على زر القفل اليدوي من الآدمن (isLocked)
+            const isLocked = match.isLocked === true;
 
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
@@ -145,8 +152,8 @@ async function loadMatches() {
                     </div>
 
                     <div class="text-center w-1/3 space-y-1">
-                        <span class="text-[10px] uppercase font-bold text-sky-400 bg-sky-950/80 px-3 py-1 rounded-full border border-sky-900/50 shadow">
-                            ${isStarted ? '🔴 Started' : matchTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                        <span class="text-[10px] uppercase font-bold ${isLocked ? 'text-rose-400 bg-rose-950/80 border-rose-900/50' : 'text-sky-400 bg-sky-950/80 border-sky-900/50'} px-3 py-1 rounded-full border shadow">
+                            ${isLocked ? '🔴 Closed (Locked)' : '🟢 Open for Prediction'}
                         </span>
                         <div class="text-xs text-slate-500 font-semibold">VS</div>
                     </div>
@@ -168,9 +175,13 @@ async function loadMatches() {
 
             opts.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${isStarted ? 'bg-slate-950 text-slate-600 border-slate-900' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
+                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${isLocked ? 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
                 btn.textContent = opt.l;
-                if (!isStarted) btn.onclick = () => submitPrediction(matchId, opt.v, btn);
+                
+                // إذا كانت مغلقة يدوياً من الآدمن، نمنع الضغط نهائياً
+                if (!isLocked) {
+                    btn.onclick = () => submitPrediction(matchId, opt.v, btn);
+                }
                 actions.appendChild(btn);
             });
             card.appendChild(actions);
@@ -209,7 +220,7 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب مع نظام كسر التعادل (Tie-breaker)
+// 3. جلب الترتيب مع نظام كسر التعادل
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
@@ -229,16 +240,13 @@ async function loadLeaderboard() {
             players.push(docSnap.data());
         });
 
-        // 🌟 عملية الفرز الذكي (النقاط ثم توقيت التسجيل)
         players.sort((a, b) => {
             const pointsA = a.totalPoints || 0;
             const pointsB = b.totalPoints || 0;
 
             if (pointsB !== pointsA) {
-                // الفرز تنازلياً حسب النقاط (الأكثر نقاطاً في الأعلى)
                 return pointsB - pointsA; 
             } else {
-                // إذا تساووا في النقاط، الفرز تصاعدياً حسب وقت التسجيل (الأقدم في الأعلى)
                 const timeA = a.createdAt || Date.now();
                 const timeB = b.createdAt || Date.now();
                 return timeA - timeB;
@@ -268,7 +276,6 @@ async function loadLeaderboard() {
         tableHtml += `</table>`;
         if(tableContainer) tableContainer.innerHTML = tableHtml;
 
-        // عرض بطاقة Fantasy الخاصة بك
         if (myCardContainer) {
             if (currentUserId) {
                 if (myData) {
