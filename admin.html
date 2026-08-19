@@ -13,7 +13,7 @@
     <div class="max-w-2xl mx-auto space-y-6">
         <header class="text-center space-y-2">
             <h1 class="text-3xl font-black text-rose-500">⚙️ لوحة تحكم الآدمن</h1>
-            <p class="text-slate-400 text-sm">تحكم في قفل المباريات، حدد النتيجة، واحسب النقاط أوتوماتيكياً</p>
+            <p class="text-slate-400 text-sm">تحكم في قفل المباريات، حدد النتيجة، وحسب النقاط أوتوماتيكياً</p>
         </header>
 
         <!-- قسم التحكم في قفل أو فتح التوقعات للمباريات -->
@@ -61,6 +61,17 @@
             </button>
             <p id="adminMsg" class="text-center text-sm font-semibold"></p>
         </section>
+
+        <!-- قسم إدارة دوري الشهر (Manager of the Month Reset) -->
+        <section class="bg-slate-900 border border-slate-800 p-6 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-lg font-bold text-sky-400">🎖️ إدارة منافسة Manager of the Month</h2>
+            <p class="text-slate-400 text-xs">زر مخصص لبدء شهر جديد وتصفير النقاط الشهرية لجميع اللاعبين مع الحفاظ على نقاط الموسم الكلية (Total Points).</p>
+            
+            <button id="resetMonthlyBtn" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                <span>🔄 تصفير نقاط الشهر الحالي (Reset Monthly Points)</span>
+            </button>
+            <p id="resetMsg" class="text-center text-sm font-semibold"></p>
+        </section>
     </div>
 
     <!-- كود الآدمن البرمجي -->
@@ -85,8 +96,10 @@
         const calculateBtn = document.getElementById('calculateBtn');
         const lockBtn = document.getElementById('lockBtn');
         const unlockBtn = document.getElementById('unlockBtn');
+        const resetMonthlyBtn = document.getElementById('resetMonthlyBtn');
         const adminMsg = document.getElementById('adminMsg');
         const lockMsg = document.getElementById('lockMsg');
+        const resetMsg = document.getElementById('resetMsg');
 
         // جلب المباريات للقوائم
         async function loadAdminMatches() {
@@ -99,13 +112,11 @@
                     const match = docSnap.data();
                     const matchText = `${match.homeTeam} VS ${match.awayTeam} ${match.isLocked ? '🔒 (مغلقة)' : '🔓 (مفتوحة)'}`;
                     
-                    // لقائمة حساب النقاط
                     const opt1 = document.createElement('option');
                     opt1.value = docSnap.id;
                     opt1.textContent = `${match.homeTeam} VS ${match.awayTeam}`;
                     matchSelect.appendChild(opt1);
 
-                    // لقائمة قفل/فتح التوقعات
                     const opt2 = document.createElement('option');
                     opt2.value = docSnap.id;
                     opt2.textContent = matchText;
@@ -151,7 +162,7 @@
             }
         };
 
-        // زر حساب النقاط
+        // زر حساب النقاط (تحديث Total Points و Monthly Points معاً)
         calculateBtn.onclick = async () => {
             const matchId = matchSelect.value;
             const correctResult = document.getElementById('realResult').value;
@@ -181,13 +192,17 @@
 
                             if (userSnap.exists()) {
                                 const currentPoints = userSnap.data().totalPoints || 0;
+                                const currentMonthly = userSnap.data().monthlyPoints || 0;
+                                
                                 await updateDoc(userRef, {
-                                    totalPoints: currentPoints + 3
+                                    totalPoints: currentPoints + 3,
+                                    monthlyPoints: currentMonthly + 3
                                 });
                             } else {
                                 await setDoc(userRef, {
                                     userId: userId,
-                                    totalPoints: 3
+                                    totalPoints: 3,
+                                    monthlyPoints: 3
                                 });
                             }
                             updatedCount++;
@@ -195,12 +210,40 @@
                     }
                 }
 
-                adminMsg.textContent = `✅ تمت العملية بنجاح! تم تحديث نقاط الفائزين (${updatedCount} مستخدم).`;
+                adminMsg.textContent = `✅ تمت العملية بنجاح! تم تحديث نقاط الفائزين (${updatedCount} مستخدم) للموسم والشهر.`;
                 adminMsg.className = "text-center text-sm font-semibold text-emerald-400";
             } catch (error) {
                 console.error(error);
                 adminMsg.textContent = "❌ حدث خطأ أثناء توزيع النقاط.";
                 adminMsg.className = "text-center text-sm font-semibold text-rose-400";
+            }
+        };
+
+        // زر تصفير نقاط الشهر الجديد
+        resetMonthlyBtn.onclick = async () => {
+            if (!confirm("⚠️ هل أنت متأكد من رغبتك في تصفير نقاط الشهر لجميع اللاعبين لبدء منافسة جديدة؟ (لن يتم مسح نقاط الموسم الكلية Top 3)")) {
+                return;
+            }
+
+            resetMsg.textContent = "جاري تصفير نقاط الشهر...";
+            resetMsg.className = "text-center text-sm font-semibold text-amber-400";
+
+            try {
+                const leaderboardSnapshot = await getDocs(collection(db, "leaderboard"));
+                
+                const updatePromises = leaderboardSnapshot.docs.map(async (docSnap) => {
+                    const userRef = doc(db, "leaderboard", docSnap.id);
+                    await updateDoc(userRef, { monthlyPoints: 0 });
+                });
+
+                await Promise.all(updatePromises);
+
+                resetMsg.textContent = "✅ تم تصفير نقاط الشهر الحالي بنجاح لجميع اللاعبين!";
+                resetMsg.className = "text-center text-sm font-semibold text-emerald-400";
+            } catch (error) {
+                console.error(error);
+                resetMsg.textContent = "❌ حدث خطأ أثناء تصفير النقاط الشهرية.";
+                resetMsg.className = "text-center text-sm font-semibold text-rose-400";
             }
         };
     </script>
