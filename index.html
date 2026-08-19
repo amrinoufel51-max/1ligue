@@ -6,7 +6,6 @@
     <title>One League | Predict & Win</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* الخلفية المتحركة */
         body {
             background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
             background-size: 400% 400%;
@@ -22,7 +21,6 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* شاشة الترحيب تختفي بمجرد ما يكملو الحروف يهبطو */
         #splashScreen {
             position: fixed;
             inset: 0;
@@ -36,13 +34,9 @@
         }
 
         @keyframes hideSplash {
-            to {
-                opacity: 0;
-                visibility: hidden;
-            }
+            to { opacity: 0; visibility: hidden; }
         }
 
-        /* أنيميشن الهبوط وثبات الحرف مع إظهار التدرج اللوني بوضوح */
         .splash-title span {
             display: inline-block;
             opacity: 0;
@@ -54,11 +48,10 @@
             animation: dropIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* تأخير زمني لكل حرف باش يهبطو بالترتيب */
         .splash-title span:nth-child(1) { animation-delay: 0.05s; }
         .splash-title span:nth-child(2) { animation-delay: 0.1s; }
         .splash-title span:nth-child(3) { animation-delay: 0.15s; }
-        .splash-title span:nth-child(4) { animation-delay: 0.2s; } /* المسافة */
+        .splash-title span:nth-child(4) { animation-delay: 0.2s; }
         .splash-title span:nth-child(5) { animation-delay: 0.25s; }
         .splash-title span:nth-child(6) { animation-delay: 0.3s; }
         .splash-title span:nth-child(7) { animation-delay: 0.35s; }
@@ -67,10 +60,7 @@
         .splash-title span:nth-child(10) { animation-delay: 0.5s; }
 
         @keyframes dropIn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .splash-sub {
@@ -79,21 +69,22 @@
             animation-delay: 0.5s;
         }
 
-        @keyframes fadeIn {
-            to { opacity: 1; }
-        }
+        @keyframes fadeIn { to { opacity: 1; } }
 
-        /* تصميم الزجاج العصري */
         .glass {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(56, 189, 248, 0.2);
         }
+
+        /* تنسيق القائمة الجانبية (Sidebar) */
+        #sidebar {
+            transition: transform 0.3s ease-in-out;
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-8 relative">
 
-    <!-- شاشة الترحيب بالحروف الهابطة والثابتة -->
     <div id="splashScreen">
         <div class="text-center space-y-3">
             <h1 class="splash-title text-5xl md:text-6xl font-black tracking-wider flex justify-center">
@@ -105,18 +96,100 @@
         </div>
     </div>
 
+    <!-- زر فتح القائمة الجانبية في أعلى الشاشة -->
+    <div class="max-w-3xl mx-auto flex justify-between items-center mb-2">
+        <button id="openSidebarBtn" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-sm flex items-center gap-2 transition shadow-lg">
+            <span>☰</span> Menu
+        </button>
+        <div class="text-xs text-slate-500">One League v2.0</div>
+    </div>
+
+    <!-- القائمة الجانبية (Sidebar Drawer) -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
+    <div id="sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-800 z-50 p-6 flex flex-col justify-between shadow-2xl transform translate-x-full">
+        <div class="space-y-6">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
+                <h2 class="text-lg font-black text-sky-400">⚡ Navigation Menu</h2>
+                <button id="closeSidebarBtn" class="text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+            </div>
+
+            <nav class="space-y-3">
+                <button onclick="openModal('aboutModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
+                    <span>ℹ️ About Us</span>
+                    <span class="text-slate-500">›</span>
+                </button>
+                <button onclick="openModal('privacyModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
+                    <span>🔒 Privacy Policy</span>
+                    <span class="text-slate-500">›</span>
+                </button>
+                <button onclick="openModal('contactModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
+                    <span>📞 Contact Us</span>
+                    <span class="text-slate-500">›</span>
+                </button>
+            </nav>
+        </div>
+
+        <div class="text-center text-xs text-slate-500 border-t border-slate-800 pt-4">
+            Built for Football Predictors ⚽
+        </div>
+    </div>
+
+    <!-- Modal: About Us -->
+    <div id="aboutModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-sky-400">ℹ️ About Us</h3>
+                <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+                **One League** هو منصة تفاعلية مصممة خصيصاً لعشاق كرة القدم لتوقع نتائج المباريات وتحدي الأصدقاء. هدفنا هو خلق مجتمع تنافسي ممتع يختبر خبرتك الكروية ويرتقي بك إلى قمة الترتيب العالمي.
+            </p>
+            <button onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
+        </div>
+    </div>
+
+    <!-- Modal: Privacy Policy -->
+    <div id="privacyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-sky-400">🔒 Privacy Policy</h3>
+                <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-slate-300 text-sm leading-relaxed">
+                نحن نحترم خصوصيتك بشكل كامل. البيانات التي نقوم بجمعها تقتصر فقط على المعرف الفريد (ID) ورقم الهاتف أو البريد الإلكتروني الذي تدخله، وهي تُستخدم حصرياً لتسجيل توقعاتك والتواصل معك في حال فوزك بالجوائز. لا نشارك بياناتك أبداً مع أي طرف ثالث.
+            </p>
+            <button onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
+        </div>
+    </div>
+
+    <!-- Modal: Contact Us -->
+    <div id="contactModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
+            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+                <h3 class="text-lg font-bold text-sky-400">📞 Contact Us</h3>
+                <button onclick="closeModal('contactModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
+            </div>
+            <p class="text-slate-300 text-sm">
+                إذا كان لديك أي استفسار، مشكلة تقنية، أو ترغب في التواصل معنا بخصوص الجوائز، يمكنك مراسلتنا أو الاتصال بنا مباشرة عبر الرقم التالي:
+            </p>
+            <div class="bg-slate-950/80 border border-sky-500/40 p-4 rounded-xl text-center">
+                <span class="text-xs text-slate-400 block mb-1">WhatsApp / Phone Number</span>
+                <a href="tel:0549770854" class="text-lg font-black text-sky-400 tracking-wider hover:underline">0549770854</a>
+            </div>
+            <button onclick="closeModal('contactModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Close</button>
+        </div>
+    </div>
+
     <!-- محتوى الموقع الأساسي -->
     <div class="max-w-3xl mx-auto space-y-6">
         
-        <!-- العنوان الرئيسي داخل الموقع -->
-        <div class="text-center py-6">
+        <div class="text-center py-4">
             <h1 onclick="location.reload()" class="cursor-pointer inline-block text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider hover:opacity-80 transition select-none" title="Click to Refresh">
                 One League
             </h1>
             <p class="text-slate-400 text-xs mt-1">Predict the matches, climb the global rank.</p>
         </div>
 
-        <!-- خانة ID اللاعب ومعلومات الاتصال -->
         <section class="glass p-5 rounded-2xl shadow-2xl space-y-3">
             <div>
                 <label class="block text-xs uppercase tracking-widest text-sky-400 font-semibold mb-1">Player Identity (Unique ID)</label>
@@ -124,7 +197,7 @@
                     class="w-full bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 focus:border-sky-400 outline-none transition text-white font-bold">
             </div>
 
-            <div>
+            <div id="contactContainer">
                 <label class="block text-xs uppercase tracking-widest text-sky-400 font-semibold mb-1">Contact (Phone or Email - For Prizes)</label>
                 <input type="text" id="userContact" placeholder="Enter WhatsApp number or Email..." 
                     class="w-full bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 focus:border-sky-400 outline-none transition text-white text-sm">
@@ -133,13 +206,11 @@
             <button id="saveIdBtn" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 py-3 rounded-xl font-bold transition shadow-lg shadow-sky-500/20">Save Identity & Contact 💾</button>
         </section>
 
-        <!-- قسم المباريات -->
         <section class="space-y-4">
             <h2 class="text-lg font-bold text-sky-400 flex items-center gap-2">⚽ Upcoming Matches</h2>
             <div id="matchesContainer" class="grid gap-4"></div>
         </section>
 
-        <!-- جدول الترتيب القابل للطي -->
         <details class="glass p-4 rounded-2xl shadow-2xl cursor-pointer group">
             <summary class="font-bold text-sky-400 flex justify-between items-center select-none outline-none">
                 <span>🏆 Global Leaderboard & Rankings</span>
@@ -154,7 +225,37 @@
 
     </div>
 
-    <!-- استدعاء ملف الـ JS -->
+    <!-- سكربت التحكم في فتح وغلق القائمة الجانبية والنوافذ المنبثقة -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOverlay = document.getElementById('sidebarOverlay');
+        const openSidebarBtn = document.getElementById('openSidebarBtn');
+        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+
+        function toggleSidebar(open) {
+            if (open) {
+                sidebar.classList.remove('translate-x-full');
+                sidebarOverlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('translate-x-full');
+                sidebarOverlay.classList.add('hidden');
+            }
+        }
+
+        openSidebarBtn.onclick = () => toggleSidebar(true);
+        closeSidebarBtn.onclick = () => toggleSidebar(false);
+        sidebarOverlay.onclick = () => toggleSidebar(false);
+
+        function openModal(modalId) {
+            toggleSidebar(false);
+            document.getElementById(modalId).classList.remove('hidden');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+        }
+    </script>
+
     <script type="module" src="app.js"></script>
 </body>
 </html>
