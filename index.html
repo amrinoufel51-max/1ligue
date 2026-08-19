@@ -141,7 +141,7 @@
                 <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm leading-relaxed">
-                **One League** is an interactive platform custom-built for football enthusiasts to predict match results and challenge friends. Our goal is to create an engaging competitive community that tests your football knowledge and elevates you to the top of the global leaderboard.
+                **One League** is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!
             </p>
             <button onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -155,7 +155,7 @@
                 <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm leading-relaxed">
-                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and the contact details (phone number or email) you provide, which are used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
+                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
             </p>
             <button onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -212,11 +212,17 @@
 
         <details class="glass p-4 rounded-2xl shadow-2xl cursor-pointer group">
             <summary class="font-bold text-sky-400 flex justify-between items-center select-none outline-none">
-                <span>🏆 Global Leaderboard & Rankings</span>
+                <span>🏆 Rankings & Leaderboard</span>
                 <span class="text-xs text-slate-400 group-open:rotate-180 transition">▼ Click to open</span>
             </summary>
             
             <div class="mt-4 pt-3 border-t border-slate-800 space-y-4">
+                <!-- أزرار التبديل بين الترتيب العام وترتيب الشهر -->
+                <div class="flex gap-2">
+                    <button id="globalRankBtn" onclick="showRank('global')" class="flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition">Overall Top 3 🏆</button>
+                    <button id="monthlyRankBtn" onclick="showRank('monthly')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition">Manager of the Month 🎖️</button>
+                </div>
+
                 <div id="myRankCard" class="bg-gradient-to-r from-sky-900/50 to-blue-900/50 border border-sky-400/40 p-4 rounded-xl flex items-center justify-between shadow-lg"></div>
                 <div id="leaderboardContainer"></div>
             </div>
