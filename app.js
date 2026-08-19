@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -34,10 +34,9 @@ window.addEventListener('DOMContentLoaded', () => {
     loadLeaderboard();
 });
 
-// زر الحفظ مع التحقق من أن الاسم فريد وإلزامية إدخال جهة الاتصال
+// زر الحفظ
 saveIdBtn.addEventListener('click', () => {
     if (userIdInput.disabled) {
-        // إذا أراد فك القفل للتعديل
         userIdInput.disabled = false;
         userContactInput.disabled = false;
         userIdInput.focus();
@@ -54,7 +53,7 @@ saveIdBtn.addEventListener('click', () => {
             return;
         }
         if (!userContact) {
-            alert("⚠️ Please enter your phone number or email so we can contact you if you win!");
+            alert("⚠️ Please enter your phone number or email!");
             userContactInput.focus();
             return;
         }
@@ -63,7 +62,7 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// دالة التحقق من قاعدة البيانات لضمان عدم تكرار الـ ID وحفظ البيانات مع جهة الاتصال
+// حفظ بيانات المستخدم مع توقيت التسجيل
 async function checkAndSaveUser(userId, userContact) {
     try {
         const userRef = doc(db, "leaderboard", userId);
@@ -78,23 +77,27 @@ async function checkAndSaveUser(userId, userContact) {
             }
         }
 
-        // حفظ محلياً وقفل الخانتين
         localStorage.setItem('prediction_user_id', userId);
         localStorage.setItem('prediction_user_contact', userContact);
         userIdInput.disabled = true;
         userContactInput.disabled = true;
         saveIdBtn.textContent = "Identity Locked 🔒 (Change)";
 
-        // جلب النقاط القديمة إن وجدت، أو إنشاء مستخدم جديد بـ 0 نقاط مع حفظ معلومات الاتصال في القاعدة
+        // جلب البيانات القديمة لتفادي الكتابة فوقها، أو إنشاء بيانات جديدة مع وقت التسجيل
         let currentPoints = 0;
+        let creationTime = new Date().getTime(); // تسجيل الوقت الحالي
+
         if (userSnap.exists()) {
             currentPoints = userSnap.data().totalPoints || 0;
+            // إذا كان مسجلاً من قبل، نحتفظ بوقته القديم
+            creationTime = userSnap.data().createdAt || creationTime; 
         }
 
         await setDoc(userRef, { 
             userId: userId, 
-            contact: userContact, // تُحفظ في قاعدة البيانات لتتمكن من رؤيتها في Firebase Console
-            totalPoints: currentPoints 
+            contact: userContact, 
+            totalPoints: currentPoints,
+            createdAt: creationTime 
         }, { merge: true });
 
         alert("✅ Identity & Contact saved successfully!");
@@ -195,7 +198,7 @@ async function submitPrediction(matchId, choice, btnElement) {
         const userRef = doc(db, "leaderboard", userId);
         const userSnap = await getDoc(userRef);
         if (!userSnap.exists()) {
-            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0 });
+            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, createdAt: new Date().getTime() });
         }
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.replace('bg-sky-600', 'bg-slate-900'));
@@ -206,15 +209,14 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب
+// 3. جلب الترتيب مع نظام كسر التعادل (Tie-breaker)
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
 
     try {
-        const q = query(collection(db, "leaderboard"), orderBy("totalPoints", "desc"));
-        const snap = await getDocs(q);
+        const snap = await getDocs(collection(db, "leaderboard"));
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
@@ -222,15 +224,31 @@ async function loadLeaderboard() {
             return;
         }
 
+        let players = [];
+        snap.forEach(docSnap => {
+            players.push(docSnap.data());
+        });
+
+        // 🌟 عملية الفرز الذكي (النقاط ثم توقيت التسجيل)
+        players.sort((a, b) => {
+            const pointsA = a.totalPoints || 0;
+            const pointsB = b.totalPoints || 0;
+
+            if (pointsB !== pointsA) {
+                // الفرز تنازلياً حسب النقاط (الأكثر نقاطاً في الأعلى)
+                return pointsB - pointsA; 
+            } else {
+                // إذا تساووا في النقاط، الفرز تصاعدياً حسب وقت التسجيل (الأقدم في الأعلى)
+                const timeA = a.createdAt || Date.now();
+                const timeB = b.createdAt || Date.now();
+                return timeA - timeB;
+            }
+        });
+
         let rank = 1;
         let myData = null;
         let myRank = 0;
         let tableHtml = `<table class="w-full text-left text-xs">`;
-        const players = [];
-
-        snap.forEach(docSnap => {
-            players.push(docSnap.data());
-        });
 
         players.forEach(data => {
             const isMe = data.userId === currentUserId;
@@ -250,7 +268,7 @@ async function loadLeaderboard() {
         tableHtml += `</table>`;
         if(tableContainer) tableContainer.innerHTML = tableHtml;
 
-        // عرض بطاقة Fantasy الخاصة بك في الأعلى
+        // عرض بطاقة Fantasy الخاصة بك
         if (myCardContainer) {
             if (currentUserId) {
                 if (myData) {
