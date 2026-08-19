@@ -22,7 +22,7 @@
             100% { background-position: 0% 50%; }
         }
 
-        /* شاشة الترحيب */
+        /* شاشة الترحيب تختفي بمجرد ما يكملو الحروف يهبطو */
         #splashScreen {
             position: fixed;
             inset: 0;
@@ -32,8 +32,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: hideSplash 0.5s ease 2.3s forwards; /* تختفي بعد 2.3 ثانية بالتمام */
-            pointer-events: none;
+            animation: hideSplash 0.4s ease 1.5s forwards; /* تروح وحدها كي يكملو الحروف */
         }
 
         @keyframes hideSplash {
@@ -43,56 +42,41 @@
             }
         }
 
-        /* أنيميشن الحروف بـ CSS الخالص */
+        /* أنيميشن الهبوط من الفوق للتحت وثبات الحرف */
         .splash-title span {
             display: inline-block;
             opacity: 0;
-            transform: translateY(-50px);
-            animation: dropAndExit 2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(-40px);
+            animation: dropIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* تأخير زمني لكل حرف باش يهبطو ويخرجو واحد ورا خوه */
-        .splash-title span:nth-child(1) { animation-delay: 0.1s; }
-        .splash-title span:nth-child(2) { animation-delay: 0.15s; }
-        .splash-title span:nth-child(3) { animation-delay: 0.2s; }
-        .splash-title span:nth-child(4) { animation-delay: 0.25s; } /* المسافة */
-        .splash-title span:nth-child(5) { animation-delay: 0.3s; }
-        .splash-title span:nth-child(6) { animation-delay: 0.35s; }
-        .splash-title span:nth-child(7) { animation-delay: 0.4s; }
-        .splash-title span:nth-child(8) { animation-delay: 0.45s; }
-        .splash-title span:nth-child(9) { animation-delay: 0.5s; }
-        .splash-title span:nth-child(10) { animation-delay: 0.55s; }
+        /* تأخير زمني لكل حرف باش يهبطو بالترتيب واحد ورا خوه */
+        .splash-title span:nth-child(1) { animation-delay: 0.05s; }
+        .splash-title span:nth-child(2) { animation-delay: 0.1s; }
+        .splash-title span:nth-child(3) { animation-delay: 0.15s; }
+        .splash-title span:nth-child(4) { animation-delay: 0.2s; } /* المسافة */
+        .splash-title span:nth-child(5) { animation-delay: 0.25s; }
+        .splash-title span:nth-child(6) { animation-delay: 0.3s; }
+        .splash-title span:nth-child(7) { animation-delay: 0.35s; }
+        .splash-title span:nth-child(8) { animation-delay: 0.4s; }
+        .splash-title span:nth-child(9) { animation-delay: 0.45s; }
+        .splash-title span:nth-child(10) { animation-delay: 0.5s; }
 
-        @keyframes dropAndExit {
-            0% {
-                opacity: 0;
-                transform: translateY(-50px);
-            }
-            25% {
+        @keyframes dropIn {
+            to {
                 opacity: 1;
                 transform: translateY(0);
-            }
-            75% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-            100% {
-                opacity: 0;
-                transform: translateY(40px);
             }
         }
 
         .splash-sub {
             opacity: 0;
-            animation: fadeInOut 2s ease forwards;
-            animation-delay: 0.3s;
+            animation: fadeIn 0.6s ease forwards;
+            animation-delay: 0.5s;
         }
 
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateY(10px); }
-            30% { opacity: 1; transform: translateY(0); }
-            70% { opacity: 1; transform: translateY(0); }
-            100% { opacity: 0; transform: translateY(10px); }
+        @keyframes fadeIn {
+            to { opacity: 1; }
         }
 
         /* تصميم الزجاج العصري */
@@ -105,7 +89,7 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- شاشة الترحيب بـ CSS خالص ومضمونة 100% -->
+    <!-- شاشة الترحيب بالحروف الهابطة والثابتة -->
     <div id="splashScreen">
         <div class="text-center space-y-3">
             <h1 class="splash-title text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
