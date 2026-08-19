@@ -14,40 +14,99 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 const userIdInput = document.getElementById('currentUserId');
+const userContactInput = document.getElementById('userContact');
 const saveIdBtn = document.getElementById('saveIdBtn');
 
 window.addEventListener('DOMContentLoaded', () => {
     const savedId = localStorage.getItem('prediction_user_id');
+    const savedContact = localStorage.getItem('prediction_user_contact');
+
     if (savedId) {
         userIdInput.value = savedId;
         userIdInput.disabled = true;
-        saveIdBtn.textContent = "Change 🔄";
+        if (savedContact) {
+            userContactInput.value = savedContact;
+            userContactInput.disabled = true;
+        }
+        saveIdBtn.textContent = "Identity Locked 🔒 (Change)";
     }
     loadMatches();
     loadLeaderboard();
 });
 
+// زر الحفظ مع التحقق من أن الاسم فريد وإلزامية إدخال جهة الاتصال
 saveIdBtn.addEventListener('click', () => {
     if (userIdInput.disabled) {
+        // إذا أراد فك القفل للتعديل
         userIdInput.disabled = false;
+        userContactInput.disabled = false;
         userIdInput.focus();
-        saveIdBtn.textContent = "Save 💾";
+        saveIdBtn.textContent = "Save Identity & Contact 💾";
         localStorage.removeItem('prediction_user_id');
+        localStorage.removeItem('prediction_user_contact');
     } else {
         const userId = userIdInput.value.trim();
+        const userContact = userContactInput.value.trim();
+
         if (!userId) {
-            alert("⚠️ Please enter your ID first!");
+            alert("⚠️ Please enter your unique ID!");
+            userIdInput.focus();
             return;
         }
-        localStorage.setItem('prediction_user_id', userId);
-        userIdInput.disabled = true;
-        saveIdBtn.textContent = "Change 🔄";
-        alert("✅ ID saved successfully!");
-        loadLeaderboard();
+        if (!userContact) {
+            alert("⚠️ Please enter your phone number or email so we can contact you if you win!");
+            userContactInput.focus();
+            return;
+        }
+
+        checkAndSaveUser(userId, userContact);
     }
 });
 
-// 1. جلب المباريات مع تصحيح مسارات اللوغوهات وحمايتها
+// دالة التحقق من قاعدة البيانات لضمان عدم تكرار الـ ID وحفظ البيانات مع جهة الاتصال
+async function checkAndSaveUser(userId, userContact) {
+    try {
+        const userRef = doc(db, "leaderboard", userId);
+        const userSnap = await getDoc(userRef);
+
+        if (userSnap.exists()) {
+            const savedLocalId = localStorage.getItem('prediction_user_id');
+            if (savedLocalId !== userId) {
+                alert("❌ This ID is already taken by another player! Please choose a unique name.");
+                userIdInput.focus();
+                return;
+            }
+        }
+
+        // حفظ محلياً وقفل الخانتين
+        localStorage.setItem('prediction_user_id', userId);
+        localStorage.setItem('prediction_user_contact', userContact);
+        userIdInput.disabled = true;
+        userContactInput.disabled = true;
+        saveIdBtn.textContent = "Identity Locked 🔒 (Change)";
+
+        // جلب النقاط القديمة إن وجدت، أو إنشاء مستخدم جديد بـ 0 نقاط مع حفظ معلومات الاتصال في القاعدة
+        let currentPoints = 0;
+        if (userSnap.exists()) {
+            currentPoints = userSnap.data().totalPoints || 0;
+        }
+
+        await setDoc(userRef, { 
+            userId: userId, 
+            contact: userContact, // تُحفظ في قاعدة البيانات لتتمكن من رؤيتها في Firebase Console
+            totalPoints: currentPoints 
+        }, { merge: true });
+
+        alert("✅ Identity & Contact saved successfully!");
+        loadLeaderboard();
+
+    } catch (e) {
+        console.error(e);
+        alert("❌ Error saving user data.");
+    }
+}
+
+// 1. جلب المباريات
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     try {
@@ -66,7 +125,6 @@ async function loadMatches() {
             const matchTime = match.matchTime ? match.matchTime.toDate() : new Date();
             const isStarted = now >= matchTime;
 
-            // تنظيف الروابط من أي فراغات خفية قد تسبب مشاكل
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
 
@@ -74,7 +132,6 @@ async function loadMatches() {
             card.className = "glass p-5 rounded-2xl space-y-4 shadow-xl border border-sky-500/20";
             card.innerHTML = `
                 <div class="flex items-center justify-between">
-                    <!-- الفريق المضيف -->
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
                             <img src="${homeLogo}" 
@@ -84,7 +141,6 @@ async function loadMatches() {
                         <span class="font-bold text-sm text-white">${match.homeTeam}</span>
                     </div>
 
-                    <!-- التوقيت أو الحالة -->
                     <div class="text-center w-1/3 space-y-1">
                         <span class="text-[10px] uppercase font-bold text-sky-400 bg-sky-950/80 px-3 py-1 rounded-full border border-sky-900/50 shadow">
                             ${isStarted ? '🔴 Started' : matchTime.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
@@ -92,7 +148,6 @@ async function loadMatches() {
                         <div class="text-xs text-slate-500 font-semibold">VS</div>
                     </div>
 
-                    <!-- الفريق الضيف -->
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
                             <img src="${awayLogo}" 
@@ -124,7 +179,13 @@ async function loadMatches() {
 // 2. إرسال التوقع
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
-    if (!userId) { alert("⚠️ Please save your ID first!"); userIdInput.focus(); return; }
+    const userContact = localStorage.getItem('prediction_user_contact');
+
+    if (!userId || !userContact) { 
+        alert("⚠️ Please save your ID and Contact info first!"); 
+        userIdInput.focus(); 
+        return; 
+    }
 
     try {
         await setDoc(doc(db, "predictions", `${userId}_${matchId}`), {
@@ -132,7 +193,10 @@ async function submitPrediction(matchId, choice, btnElement) {
         });
         
         const userRef = doc(db, "leaderboard", userId);
-        if (!(await getDoc(userRef)).exists()) await setDoc(userRef, { userId, totalPoints: 0 });
+        const userSnap = await getDoc(userRef);
+        if (!userSnap.exists()) {
+            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0 });
+        }
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.replace('bg-sky-600', 'bg-slate-900'));
         btnElement.classList.replace('bg-slate-900', 'bg-sky-600');
@@ -142,7 +206,7 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب مع بطاقة Fantasy العلوية والجدول العام
+// 3. جلب الترتيب
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
