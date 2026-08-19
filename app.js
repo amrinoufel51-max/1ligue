@@ -313,4 +313,4 @@ async function loadLeaderboard() {
     } catch (e) { 
         console.error(e); 
     }
-}
+} 
