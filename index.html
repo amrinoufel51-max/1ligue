@@ -32,7 +32,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            animation: hideSplash 0.4s ease 1.5s forwards; /* تروح وحدها كي يكملو الحروف */
+            animation: hideSplash 0.4s ease 1.5s forwards;
         }
 
         @keyframes hideSplash {
@@ -42,15 +42,19 @@
             }
         }
 
-        /* أنيميشن الهبوط من الفوق للتحت وثبات الحرف */
+        /* أنيميشن الهبوط وثبات الحرف مع إظهار التدرج اللوني بوضوح */
         .splash-title span {
             display: inline-block;
             opacity: 0;
             transform: translateY(-40px);
+            background: linear-gradient(to right, #38bdf8, #2563eb);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
             animation: dropIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
-        /* تأخير زمني لكل حرف باش يهبطو بالترتيب واحد ورا خوه */
+        /* تأخير زمني لكل حرف باش يهبطو بالترتيب */
         .splash-title span:nth-child(1) { animation-delay: 0.05s; }
         .splash-title span:nth-child(2) { animation-delay: 0.1s; }
         .splash-title span:nth-child(3) { animation-delay: 0.15s; }
@@ -92,7 +96,7 @@
     <!-- شاشة الترحيب بالحروف الهابطة والثابتة -->
     <div id="splashScreen">
         <div class="text-center space-y-3">
-            <h1 class="splash-title text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider">
+            <h1 class="splash-title text-5xl md:text-6xl font-black tracking-wider flex justify-center">
                 <span>O</span><span>n</span><span>e</span><span>&nbsp;</span><span>L</span><span>e</span><span>a</span><span>g</span><span>u</span><span>e</span>
             </h1>
             <p class="splash-sub text-slate-400 text-xs md:text-sm tracking-widest uppercase">
