@@ -15,7 +15,7 @@
             position: relative;
         }
 
-        /* الخلفية المتحركة الناعمة (Mesh Gradient - ElevenLabs Style) */
+        /* خلفية ElevenLabs الاحترافية: دواوير وتماوجات متحركة */
         .mesh-bg {
             position: fixed;
             top: 0;
@@ -23,17 +23,61 @@
             width: 100vw;
             height: 100vh;
             z-index: -1;
-            background: linear-gradient(120deg, #020617, #0f172a, #0369a1, #1e1b4b);
-            background-size: 300% 300%;
-            animation: gradientMove 18s ease infinite;
-            filter: blur(90px);
-            opacity: 0.85;
+            background: #020617;
+            overflow: hidden;
         }
 
-        @keyframes gradientMove {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+        /* الدوائر المضيئة المتماوجة في الخلفية */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            animation: floatBlobs 20s ease infinite alternate;
+        }
+
+        .blob-1 {
+            width: 450px;
+            height: 450px;
+            background: #0284c7; /* أزرق سماوي */
+            top: -10%;
+            left: -10%;
+            animation-duration: 18s;
+        }
+
+        .blob-2 {
+            width: 500px;
+            height: 500px;
+            background: #1d4ed8; /* أزرق داكن */
+            bottom: -20%;
+            right: -10%;
+            animation-duration: 25s;
+            animation-direction: alternate-reverse;
+        }
+
+        .blob-3 {
+            width: 350px;
+            height: 350px;
+            background: #06b6d4; /* تيركواز/سيان */
+            top: 40%;
+            left: 30%;
+            animation-duration: 22s;
+            opacity: 0.4;
+        }
+
+        @keyframes floatBlobs {
+            0% {
+                transform: translate(0px, 0px) scale(1);
+            }
+            33% {
+                transform: translate(50px, -80px) scale(1.1);
+            }
+            66% {
+                transform: translate(-40px, 60px) scale(0.9);
+            }
+            100% {
+                transform: translate(30px, 40px) scale(1.05);
+            }
         }
 
         #splashScreen {
@@ -99,8 +143,12 @@
 </head>
 <body class="p-4 md:p-8 relative">
 
-    <!-- الخلفية المتحركة الناعمة -->
-    <div class="mesh-bg"></div>
+    <!-- الخلفية الجديدة: دواوير وتماوجات متحركة -->
+    <div class="mesh-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
 
     <div id="splashScreen">
         <div class="text-center space-y-3">
