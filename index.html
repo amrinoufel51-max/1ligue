@@ -7,12 +7,27 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
-            background-size: 400% 400%;
-            animation: gradientMove 15s ease infinite;
+            background-color: #020617;
             color: white;
             font-family: 'Segoe UI', sans-serif;
             min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* الخلفية المتحركة الناعمة (Mesh Gradient - ElevenLabs Style) */
+        .mesh-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+            background: linear-gradient(120deg, #020617, #0f172a, #0369a1, #1e1b4b);
+            background-size: 300% 300%;
+            animation: gradientMove 18s ease infinite;
+            filter: blur(90px);
+            opacity: 0.85;
         }
 
         @keyframes gradientMove {
@@ -24,7 +39,7 @@
         #splashScreen {
             position: fixed;
             inset: 0;
-            background: radial-gradient(circle at center, #0a192f 0%, #020617 100%);
+            background: #020617;
             z-index: 9999;
             display: flex;
             flex-direction: column;
@@ -72,9 +87,9 @@
         @keyframes fadeIn { to { opacity: 1; } }
 
         .glass {
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(56, 189, 248, 0.2);
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(56, 189, 248, 0.15);
         }
 
         #sidebar {
@@ -83,6 +98,9 @@
     </style>
 </head>
 <body class="p-4 md:p-8 relative">
+
+    <!-- الخلفية المتحركة الناعمة -->
+    <div class="mesh-bg"></div>
 
     <div id="splashScreen">
         <div class="text-center space-y-3">
@@ -100,7 +118,7 @@
         <button id="openSidebarBtn" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-sm flex items-center gap-2 transition shadow-lg">
             <span>☰</span> Menu
         </button>
-        <div class="text-xs text-slate-500">One League v2.0</div>
+        <div class="text-xs text-slate-400">One League v2.0</div>
     </div>
 
     <!-- Sidebar Drawer -->
@@ -141,7 +159,7 @@
                 <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p class="text-slate-300 text-sm leading-relaxed">
-                **One League** is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!
+                <b>One League</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!
             </p>
             <button onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -217,7 +235,6 @@
             </summary>
             
             <div class="mt-4 pt-3 border-t border-slate-800 space-y-4">
-                <!-- أزرار التبديل بين الترتيب العام وترتيب الشهر -->
                 <div class="flex gap-2">
                     <button id="globalRankBtn" onclick="showRank('global')" class="flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition">Overall Top 3 🏆</button>
                     <button id="monthlyRankBtn" onclick="showRank('monthly')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition">Manager of the Month 🎖️</button>
