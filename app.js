@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -135,11 +135,26 @@ async function checkAndSaveUser(userId, userContact) {
     }
 }
 
-// 1. جلب المباريات مع تفقد القفل اليدوي من الآدمن (isLocked)
+// 1. جلب المباريات مع تفقد القفل اليدوي من الآدمن (isLocked) واسترجاع توقعات المستخدم السابقة
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
+    const currentUserId = localStorage.getItem('prediction_user_id');
+
     try {
+        // جلب المباريات والتوقعات الخاصة بالمستخدم دفعة واحدة (إن كان مسجلاً)
         const querySnapshot = await getDocs(collection(db, "matches"));
+        
+        let userPredictions = {};
+        if (currentUserId) {
+            const predSnap = await getDocs(collection(db, "predictions"));
+            predSnap.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.userId === currentUserId) {
+                    userPredictions[data.matchId] = data.prediction;
+                }
+            });
+        }
+
         container.innerHTML = "";
 
         if (querySnapshot.empty) {
@@ -152,6 +167,7 @@ async function loadMatches() {
             const matchId = docSnap.id;
             
             const isLocked = match.isLocked === true;
+            const userChoice = userPredictions[matchId] || null;
 
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
@@ -192,8 +208,19 @@ async function loadMatches() {
             const opts = [{l: 'Home Win', v: '1'}, {l: 'Draw', v: 'X'}, {l: 'Away Win', v: '2'}];
 
             opts.forEach(opt => {
+                const isSelected = userChoice === opt.v;
                 const btn = document.createElement('button');
-                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${isLocked ? 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300'}`;
+                
+                // تحديد ستايل الزر بناءً على ما إذا كان مختاراً مسبقاً أو مغلقاً
+                let btnStyle = 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300';
+                if (isSelected) {
+                    btnStyle = 'bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30';
+                }
+                if (isLocked) {
+                    btnStyle = isSelected ? 'bg-sky-700/60 text-white border-sky-600 cursor-not-allowed' : 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed';
+                }
+
+                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${btnStyle}`;
                 btn.textContent = opt.l;
                 
                 if (!isLocked) {
@@ -229,32 +256,25 @@ async function submitPrediction(matchId, choice, btnElement) {
             await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, monthlyPoints: 0, createdAt: new Date().getTime() });
         }
 
-        btnElement.parentElement.querySelectorAll('button').forEach(b => b.classList.replace('bg-sky-600', 'bg-slate-900'));
-        btnElement.classList.replace('bg-slate-900', 'bg-sky-600');
+        // تحديث ألوان الأزرار فوراً لتوضيح الاختيار الحالي
+        btnElement.parentElement.querySelectorAll('button').forEach(b => {
+            b.className = "flex-1 py-2.5 rounded-xl text-xs font-bold border transition bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300 text-white";
+        });
+        btnElement.className = "flex-1 py-2.5 rounded-xl text-xs font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30";
         
         alert(`✅ Prediction saved!`);
         loadLeaderboard();
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل والـ Limit المانع لبطء الموقع
+// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
 
     try {
-        const fieldToSort = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
-
-        // استخدام الـ Query المخصص مع الـ Limit لجلب أفضل 50 لاعب فقط (آمن لملايين المستخدمين)
-        const q = query(
-            collection(db, "leaderboard"),
-            orderBy(fieldToSort, "desc"),
-            orderBy("createdAt", "asc"), // نظام كسر التعادل أوتوماتيكياً عبر Firestore
-            limit(50)
-        );
-
-        const snap = await getDocs(q);
+        const snap = await getDocs(collection(db, "leaderboard"));
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
@@ -267,12 +287,33 @@ async function loadLeaderboard() {
             players.push(docSnap.data());
         });
 
+        // الترتيب حسب النوع المحدد (Global أو Monthly)
+        players.sort((a, b) => {
+            const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
+            const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
+
+            if (pointsB !== pointsA) {
+                return pointsB - pointsA; 
+            } else {
+                const timeA = a.createdAt || Date.now();
+                const timeB = b.createdAt || Date.now();
+                return timeA - timeB;
+            }
+        });
+
         let rank = 1;
+        let myData = null;
+        let myRank = 0;
         let tableHtml = `<table class="w-full text-left text-xs">`;
 
         players.forEach(data => {
             const isMe = data.userId === currentUserId;
-            const currentPts = data[fieldToSort] || 0;
+            if (isMe) {
+                myData = data;
+                myRank = rank;
+            }
+
+            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
 
             tableHtml += `
                 <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
@@ -285,28 +326,16 @@ async function loadLeaderboard() {
         tableHtml += `</table>`;
         if(tableContainer) tableContainer.innerHTML = tableHtml;
 
-        // جلب تفاصيل المستخدم الحالي بشكل منفصل إذا لم يكن ضمن الـ Top 50 لضمان ظهور بطاقته الشخصية بدقة
         if (myCardContainer) {
             if (currentUserId) {
-                const myUserRef = doc(db, "leaderboard", currentUserId);
-                const myUserSnap = await getDoc(myUserRef);
-
-                if (myUserSnap.exists()) {
-                    const myData = myUserSnap.data();
-                    const myPts = myData[fieldToSort] || 0;
-                    const rankTitle = currentRankType === 'global' ? 'Overall Top 3 Rank' : 'Manager of the Month Rank';
-
-                    // محاولة إيجاد رتبته العرضية داخل القائمة المعروضة إن وجدت
-                    let displayedRankText = "50+";
-                    const foundIndex = players.findIndex(p => p.userId === currentUserId);
-                    if (foundIndex !== -1) {
-                        displayedRankText = `#${foundIndex + 1}`;
-                    }
+                if (myData) {
+                    const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                    const rankTitle = currentRankType === 'global' ? 'Principal Rank' : 'Manager of the Month Rank';
 
                     myCardContainer.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">
-                                ${displayedRankText}
+                                #${myRank}
                             </div>
                             <div>
                                 <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
