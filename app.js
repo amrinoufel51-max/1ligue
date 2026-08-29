@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -237,14 +237,24 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل
+// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل والـ Limit المانع لبطء الموقع
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
 
     try {
-        const snap = await getDocs(collection(db, "leaderboard"));
+        const fieldToSort = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
+
+        // استخدام الـ Query المخصص مع الـ Limit لجلب أفضل 50 لاعب فقط (آمن لملايين المستخدمين)
+        const q = query(
+            collection(db, "leaderboard"),
+            orderBy(fieldToSort, "desc"),
+            orderBy("createdAt", "asc"), // نظام كسر التعادل أوتوماتيكياً عبر Firestore
+            limit(50)
+        );
+
+        const snap = await getDocs(q);
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
@@ -257,33 +267,12 @@ async function loadLeaderboard() {
             players.push(docSnap.data());
         });
 
-        // الترتيب حسب النوع المحدد (Global أو Monthly)
-        players.sort((a, b) => {
-            const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
-            const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
-
-            if (pointsB !== pointsA) {
-                return pointsB - pointsA; 
-            } else {
-                const timeA = a.createdAt || Date.now();
-                const timeB = b.createdAt || Date.now();
-                return timeA - timeB;
-            }
-        });
-
         let rank = 1;
-        let myData = null;
-        let myRank = 0;
         let tableHtml = `<table class="w-full text-left text-xs">`;
 
         players.forEach(data => {
             const isMe = data.userId === currentUserId;
-            if (isMe) {
-                myData = data;
-                myRank = rank;
-            }
-
-            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
+            const currentPts = data[fieldToSort] || 0;
 
             tableHtml += `
                 <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
@@ -296,16 +285,28 @@ async function loadLeaderboard() {
         tableHtml += `</table>`;
         if(tableContainer) tableContainer.innerHTML = tableHtml;
 
+        // جلب تفاصيل المستخدم الحالي بشكل منفصل إذا لم يكن ضمن الـ Top 50 لضمان ظهور بطاقته الشخصية بدقة
         if (myCardContainer) {
             if (currentUserId) {
-                if (myData) {
-                    const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                const myUserRef = doc(db, "leaderboard", currentUserId);
+                const myUserSnap = await getDoc(myUserRef);
+
+                if (myUserSnap.exists()) {
+                    const myData = myUserSnap.data();
+                    const myPts = myData[fieldToSort] || 0;
                     const rankTitle = currentRankType === 'global' ? 'Overall Top 3 Rank' : 'Manager of the Month Rank';
+
+                    // محاولة إيجاد رتبته العرضية داخل القائمة المعروضة إن وجدت
+                    let displayedRankText = "50+";
+                    const foundIndex = players.findIndex(p => p.userId === currentUserId);
+                    if (foundIndex !== -1) {
+                        displayedRankText = `#${foundIndex + 1}`;
+                    }
 
                     myCardContainer.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">
-                                #${myRank}
+                                ${displayedRankText}
                             </div>
                             <div>
                                 <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
@@ -336,4 +337,4 @@ async function loadLeaderboard() {
     } catch (e) { 
         console.error(e); 
     }
-} 
+}
