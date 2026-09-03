@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -211,7 +211,6 @@ async function loadMatches() {
                 const isSelected = userChoice === opt.v;
                 const btn = document.createElement('button');
                 
-                // تحديد ستايل الزر بناءً على ما إذا كان مختاراً مسبقاً أو مغلقاً
                 let btnStyle = 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300';
                 if (isSelected) {
                     btnStyle = 'bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30';
@@ -256,7 +255,6 @@ async function submitPrediction(matchId, choice, btnElement) {
             await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, monthlyPoints: 0, createdAt: new Date().getTime() });
         }
 
-        // تحديث ألوان الأزرار فوراً لتوضيح الاختيار الحالي
         btnElement.parentElement.querySelectorAll('button').forEach(b => {
             b.className = "flex-1 py-2.5 rounded-xl text-xs font-bold border transition bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300 text-white";
         });
@@ -267,65 +265,80 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert("❌ Error saving prediction."); }
 }
 
-// 3. جلب الترتيب بناءً على التبويب المختار (Overall أو Monthly) مع نظام كسر التعادل
+// 3. جلب الترتيب العام وترتيب الشهر مع حصر العرض في أول 50 مشتركاً في الجدول العام
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
 
     try {
-        const snap = await getDocs(collection(db, "leaderboard"));
+        // جلب وترتيب البيانات من فايربيس مع حصر القائمة العامة في 50 عنصر لتخفيف الحمل
+        const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
+        const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"), limit(50));
+        const snap = await getDocs(q);
+
+        // جلب بيانات المستخدم الحالي حصرياً للبطاقة الخاصة به (إن وُجد خارج الـ 50 الأوائل)
+        let myData = null;
+        let myRank = "-";
+        
+        if (currentUserId) {
+            const allSnap = await getDocs(collection(db, "leaderboard"));
+            let allPlayers = [];
+            allSnap.forEach(d => allPlayers.push(d.data()));
+
+            // إعادة الفرز الكلي لتحديد الترتيب الدقيق للمستخدم الحالي
+            allPlayers.sort((a, b) => {
+                const pA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
+                const pB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
+                if (pB !== pA) return pB - pA;
+                return (a.createdAt || Date.now()) - (b.createdAt || Date.now());
+            });
+
+            let globalIndex = 1;
+            for (let player of allPlayers) {
+                if (player.userId === currentUserId) {
+                    myData = player;
+                    myRank = globalIndex;
+                    break;
+                }
+                globalIndex++;
+            }
+        }
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
-            if(myCardContainer) myCardContainer.innerHTML = `<span class="text-xs text-slate-400">Save your ID to see your rank.</span>`;
-            return;
+        } else {
+            let players = [];
+            snap.forEach(docSnap => players.push(docSnap.data()));
+
+            // ترتيب دقيق لأول 50 مشتركاً مع تطبيق قاعدة كسر التعادل (وقت التسجيل)
+            players.sort((a, b) => {
+                const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
+                const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
+                if (pointsB !== pointsA) return pointsB - pointsA; 
+                return (a.createdAt || Date.now()) - (b.createdAt || Date.now());
+            });
+
+            let rank = 1;
+            let tableHtml = `<table class="w-full text-left text-xs">`;
+
+            players.forEach(data => {
+                const isMe = data.userId === currentUserId;
+                const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
+
+                tableHtml += `
+                    <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
+                        <td class="py-2.5 px-2">#${rank}</td>
+                        <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
+                        <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
+                    </tr>`;
+                rank++;
+            });
+            tableHtml += `</table>`;
+            tableContainer.innerHTML = tableHtml;
         }
 
-        let players = [];
-        snap.forEach(docSnap => {
-            players.push(docSnap.data());
-        });
-
-        // الترتيب حسب النوع المحدد (Global أو Monthly)
-        players.sort((a, b) => {
-            const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
-            const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
-
-            if (pointsB !== pointsA) {
-                return pointsB - pointsA; 
-            } else {
-                const timeA = a.createdAt || Date.now();
-                const timeB = b.createdAt || Date.now();
-                return timeA - timeB;
-            }
-        });
-
-        let rank = 1;
-        let myData = null;
-        let myRank = 0;
-        let tableHtml = `<table class="w-full text-left text-xs">`;
-
-        players.forEach(data => {
-            const isMe = data.userId === currentUserId;
-            if (isMe) {
-                myData = data;
-                myRank = rank;
-            }
-
-            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
-
-            tableHtml += `
-                <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
-                    <td class="py-2.5 px-2">#${rank}</td>
-                    <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
-                    <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
-                </tr>`;
-            rank++;
-        });
-        tableHtml += `</table>`;
-        if(tableContainer) tableContainer.innerHTML = tableHtml;
-
+        // تحديث المربع الشخصي للمستخدم الحالي
         if (myCardContainer) {
             if (currentUserId) {
                 if (myData) {
