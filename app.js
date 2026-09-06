@@ -18,10 +18,8 @@ const userContactInput = document.getElementById('userContact');
 const contactContainer = document.getElementById('contactContainer');
 const saveIdBtn = document.getElementById('saveIdBtn');
 
-// متغير لتحديد نوع الترتيب الحالي ('global' أو 'monthly')
 let currentRankType = 'global';
 
-// نظام الترجمة واللغات (إنجليزي / عربي)
 const translations = {
     en: {
         saveBtnLocked: "Identity Locked 🔒 (Change ID)",
@@ -36,7 +34,32 @@ const translations = {
         alertErrorPred: "❌ Error saving prediction.",
         noMatches: "No matches available.",
         noRankings: "No rankings yet.",
-        drawBtn: "Draw 🤝"
+        drawBtn: "Draw 🤝",
+        menu: "Menu",
+        about: "ℹ️ About Us",
+        privacy: "🔒 Privacy Policy",
+        contact: "📞 Contact Us",
+        aboutTitle: "ℹ️ About Us",
+        privacyTitle: "🔒 Privacy Policy",
+        contactTitle: "📞 Contact Us",
+        aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!",
+        privacyText: "We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.",
+        contactText: "If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via the number below:",
+        gotIt: "Got it",
+        closeModal: "Close",
+        subTitle: "Predict the matches, climb the global rank.",
+        playerIdLabel: "Player Identity (Unique ID)",
+        playerIdPlaceholder: "Enter your unique id...",
+        contactLabel: "Contact (Phone or Email - For Prizes)",
+        contactPlaceholder: "Enter WhatsApp number or Email...",
+        upcomingMatches: "⚽ Upcoming Matches",
+        rankingsTitle: "🏆 Rankings & Leaderboard",
+        rankingsToggle: "▼ Click to open",
+        principalRank: "Principal Rank 🏆",
+        monthlyRank: "Manager of the Month 🎖️",
+        navMenuTitle: "⚡ Navigation Menu",
+        navFooter: "Built for Football Predictors ⚽",
+        whatsappLabel: "WhatsApp / Phone Number"
     },
     ar: {
         saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
@@ -51,18 +74,42 @@ const translations = {
         alertErrorPred: "❌ خطأ في حفظ التوقع.",
         noMatches: "لا توجد مباريات متاحة حالياً.",
         noRankings: "لا توجد ترتيبات حتى الآن.",
-        drawBtn: "تعادل 🤝"
+        drawBtn: "تعادل 🤝",
+        menu: "القائمة",
+        about: "ℹ️ من نحن",
+        privacy: "🔒 سياسة الخصوصية",
+        contact: "📞 اتصل بنا",
+        aboutTitle: "ℹ️ من نحن",
+        privacyTitle: "🔒 سياسة الخصوصية",
+        contactTitle: "📞 اتصل بنا",
+        aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لتوقع نتائج المباريات والفوز بجوائز كبرى لصاحب المراكز الثلاثة الأولى في الموسم، إلى جانب جائزة <b>مدرب الشهر</b> الخاصة!",
+        privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال لتسجيل توقعاتك والتواصل معك حال فوزك بالجوائز. لا نشارك بياناتك أبداً مع أطراف ثالثة.",
+        contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية أو أردت الاستفسار عن الجوائز، يمكنك التواصل معنا مباشرة عبر الرقم أدناه:",
+        gotIt: "حسناً",
+        closeModal: "إغلاق",
+        subTitle: "توقع المباريات وتصدر الترتيب العالمي.",
+        playerIdLabel: "هوية اللاعب (المعرف الفريد)",
+        playerIdPlaceholder: "أدخل المعرف الفريد الخاص بك...",
+        contactLabel: "معلومات الاتصال (هاتف أو إيميل - للجوائز)",
+        contactPlaceholder: "أدخل رقم الواتساب أو البريد الإلكتروني...",
+        upcomingMatches: "⚽ المباريات القادمة",
+        rankingsTitle: "🏆 التصنيفات لوحة المتصدرين",
+        rankingsToggle: "▼ اضغط للفتح",
+        principalRank: "الترتيب الرئيسي 🏆",
+        monthlyRank: "مدرب الشهر 🎖️",
+        navMenuTitle: "⚡ قائمة التنقل",
+        navFooter: "مبني لعشاق التوقعات ⚽",
+        whatsappLabel: "رقم الواتساب / الهاتف"
     }
 };
 
 let currentLang = localStorage.getItem("app_lang") || "en";
 
-// دالة تبديل اللغة
 window.toggleLanguage = function() {
     currentLang = currentLang === "en" ? "ar" : "en";
     localStorage.setItem("app_lang", currentLang);
     applyLanguage();
-    loadMatches(); // إعادة تحميل المباريات لتحديث أسماء الأزرار المترجمة
+    loadMatches();
     loadLeaderboard();
 };
 
@@ -70,17 +117,52 @@ function applyLanguage() {
     document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
     document.documentElement.lang = currentLang;
 
-    // تحديث زر تغيير اللغة في الواجهة إن وجد
+    const t = translations[currentLang];
+
     const langBtn = document.getElementById('langToggleBtn');
     if (langBtn) {
         langBtn.innerText = currentLang === "en" ? "العربية 🇩🇿" : "English 🇬🇧";
     }
 
-    // تحديث النصوص الثابتة بناءً على عناصر الـ HTML إن وُجدت
     const savedId = localStorage.getItem('prediction_user_id');
     if (saveIdBtn) {
-        saveIdBtn.textContent = savedId ? translations[currentLang].saveBtnLocked : translations[currentLang].saveBtnUnlock;
+        saveIdBtn.textContent = savedId ? t.saveBtnLocked : t.saveBtnUnlock;
     }
+
+    if (userIdInput) userIdInput.placeholder = t.playerIdPlaceholder;
+    if (userContactInput) userContactInput.placeholder = t.contactPlaceholder;
+
+    const updateTextById = (id, text) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = text;
+    };
+
+    updateTextById('menuText', `<span>☰</span> ${t.menu}`);
+    updateTextById('subTitleText', t.subTitle);
+    updateTextById('playerIdLabelText', t.playerIdLabel);
+    updateTextById('contactLabelText', t.contactLabel);
+    updateTextById('upcomingMatchesTitle', t.upcomingMatches);
+    updateTextById('rankingsTitleText', t.rankingsToggle ? `<span>🏆 ${t.rankingsTitle}</span><span class="text-xs text-slate-400 group-open:rotate-180 transition">${t.rankingsToggle}</span>` : '');
+    updateTextById('globalRankBtn', t.principalRank);
+    updateTextById('monthlyRankBtn', t.monthlyRank);
+    updateTextById('navMenuTitleText', `⚡ ${t.navMenuTitle}`);
+    updateTextById('navAboutText', `<span>${t.about}</span><span class="text-slate-500">›</span>`);
+    updateTextById('navPrivacyText', `<span>${t.privacy}</span><span class="text-slate-500">›</span>`);
+    updateTextById('navContactText', `<span>${t.contact}</span><span class="text-slate-500">›</span>`);
+    updateTextById('navFooterText', t.navFooter);
+
+    updateTextById('aboutModalTitle', t.aboutTitle);
+    updateTextById('aboutModalText', t.aboutText);
+    updateTextById('aboutModalBtn', t.gotIt);
+
+    updateTextById('privacyModalTitle', t.privacyTitle);
+    updateTextById('privacyModalText', t.privacyText);
+    updateTextById('privacyModalBtn', t.gotIt);
+
+    updateTextById('contactModalTitle', t.contactTitle);
+    updateTextById('contactModalText', t.contactText);
+    updateTextById('whatsappLabelText', t.whatsappLabel);
+    updateTextById('contactModalBtn', t.closeModal);
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -102,7 +184,6 @@ window.addEventListener('DOMContentLoaded', () => {
     loadLeaderboard();
 });
 
-// دالة عالمية للتبديل بين الترتيب العام وترتيب الشهر
 window.showRank = function(type) {
     currentRankType = type;
     const globalBtn = document.getElementById('globalRankBtn');
@@ -119,7 +200,6 @@ window.showRank = function(type) {
     loadLeaderboard();
 };
 
-// زر الحفظ
 saveIdBtn.addEventListener('click', () => {
     const t = translations[currentLang];
     if (userIdInput.disabled) {
@@ -146,7 +226,6 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// حفظ البيانات في قاعدة البيانات
 async function checkAndSaveUser(userId, userContact) {
     const t = translations[currentLang];
     try {
@@ -200,7 +279,6 @@ async function checkAndSaveUser(userId, userContact) {
     }
 }
 
-// 1. جلب المباريات وعرض أزرار التوقع بأسماء الفرق الفعلية (Real Madrid Win / Barcelona Win)
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     const currentUserId = localStorage.getItem('prediction_user_id');
@@ -237,7 +315,6 @@ async function loadMatches() {
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
             
-            // أسماء الفرق الديناميكية القادمة من الفايربيز
             const homeTeamName = match.homeTeam || "Home";
             const awayTeamName = match.awayTeam || "Away";
 
@@ -275,11 +352,13 @@ async function loadMatches() {
             const actions = document.createElement('div');
             actions.className = "flex gap-2 pt-2";
             
-            // تخصيص خيارات التوقع بأسمای الفرق الحقيقية مباشرة
+            const homeLabelCustom = match.homeTeamWin && match.homeTeamWin.trim() !== "" ? match.homeTeamWin : `${homeTeamName} Win`;
+            const awayLabelCustom = match.awayTeamWin && match.awayTeamWin.trim() !== "" ? match.awayTeamWin : `${awayTeamName} Win`;
+
             const opts = [
-                { l: `${homeTeamName} Win`, v: '1' }, 
+                { l: homeLabelCustom, v: '1' }, 
                 { l: t.drawBtn, v: 'X' }, 
-                { l: `${awayTeamName} Win`, v: '2' }
+                { l: awayLabelCustom, v: '2' }
             ];
 
             opts.forEach(opt => {
@@ -308,7 +387,6 @@ async function loadMatches() {
     } catch (e) { console.error(e); }
 }
 
-// 2. إرسال التوقع
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
     const userContact = localStorage.getItem('prediction_user_contact');
@@ -341,7 +419,6 @@ async function submitPrediction(matchId, choice, btnElement) {
     } catch (e) { alert(t.alertErrorPred); }
 }
 
-// 3. جلب الترتيب العام وترتيب الشهر
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
