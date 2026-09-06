@@ -59,7 +59,8 @@ const translations = {
         monthlyRank: "Manager of the Month 🎖️",
         navMenuTitle: "⚡ Navigation Menu",
         navFooter: "Built for Football Predictors ⚽",
-        whatsappLabel: "WhatsApp / Phone Number"
+        whatsappLabel: "WhatsApp / Phone Number",
+        pointsLabel: "pts"
     },
     ar: {
         saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
@@ -99,7 +100,8 @@ const translations = {
         monthlyRank: "مدرب الشهر 🎖️",
         navMenuTitle: "⚡ قائمة التنقل",
         navFooter: "مبني لعشاق التوقعات ⚽",
-        whatsappLabel: "رقم الواتساب / الهاتف"
+        whatsappLabel: "رقم الواتساب / الهاتف",
+        pointsLabel: "نقاط"
     }
 };
 
@@ -384,7 +386,14 @@ async function loadLeaderboard() {
         let rank = 1;
         let myData = null;
         let myRank = "-";
-        let tableHtml = `<table class="w-full text-left text-xs">`;
+        
+        // جدول منسق ومقسّم بعناية مع ألوان ومحاذاة تامة تناسب اللغات (RTL / LTR)
+        let tableHtml = `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">`;
+        tableHtml += `<thead><tr class="border-b border-slate-800 text-slate-400 bg-slate-900/40">
+            <th class="py-3 px-3 w-12 text-center">#</th>
+            <th class="py-3 px-3 text-start">${currentLang === 'ar' ? 'اللاعب' : 'Player'}</th>
+            <th class="py-3 px-3 text-end">${currentLang === 'ar' ? 'النقاط' : 'Points'}</th>
+        </tr></thead><tbody>`;
 
         players.forEach(data => {
             const isMe = data.userId === currentUserId;
@@ -395,15 +404,20 @@ async function loadLeaderboard() {
                 myRank = rank;
             }
 
+            let rankBadgeClass = "text-slate-400 font-semibold";
+            if (rank === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
+            else if (rank === 2) rankBadgeClass = "text-slate-200 font-bold";
+            else if (rank === 3) rankBadgeClass = "text-amber-600 font-bold";
+
             tableHtml += `
-                <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
-                    <td class="py-2.5 px-2">#${rank}</td>
-                    <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
-                    <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
+                <tr class="${isMe ? 'bg-sky-500/20 border-sky-400/50 font-bold text-sky-200 shadow-inner' : 'text-slate-300 hover:bg-slate-900/30'} border-b border-slate-800/40 transition">
+                    <td class="py-3 px-3 text-center ${rankBadgeClass}">#${rank}</td>
+                    <td class="py-3 px-3 text-start truncate max-w-[140px] sm:max-w-[200px]">${data.userId} ${isMe ? '👑' : ''}</td>
+                    <td class="py-3 px-3 text-end font-black text-cyan-400">${currentPts} <span class="text-[10px] text-slate-400 font-normal">${t.pointsLabel}</span></td>
                 </tr>`;
             rank++;
         });
-        tableHtml += `</table>`;
+        tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
 
         if (myCardContainer && currentUserId) {
@@ -419,9 +433,9 @@ async function loadLeaderboard() {
                             <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
                         </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-end">
                         <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? 'Total Points' : 'Monthly Points'}</div>
-                        <div class="text-lg font-black text-cyan-400">${myPts} pts</div>
+                        <div class="text-lg font-black text-cyan-400">${myPts} ${t.pointsLabel}</div>
                     </div>
                 `;
             } else {
