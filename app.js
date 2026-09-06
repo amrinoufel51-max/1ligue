@@ -118,7 +118,6 @@ function applyLanguage() {
     document.documentElement.lang = currentLang;
 
     const t = translations[currentLang];
-
     const langBtn = document.getElementById('langToggleBtn');
     if (langBtn) {
         langBtn.innerText = currentLang === "en" ? "العربية 🇩🇿" : "English 🇬🇧";
@@ -173,11 +172,7 @@ window.addEventListener('DOMContentLoaded', () => {
     if (savedId) {
         userIdInput.value = savedId;
         userIdInput.disabled = true;
-        
-        if (contactContainer) {
-            contactContainer.style.display = 'none';
-        }
-
+        if (contactContainer) contactContainer.style.display = 'none';
         saveIdBtn.textContent = translations[currentLang].saveBtnLocked;
     }
     loadMatches();
@@ -196,7 +191,6 @@ window.showRank = function(type) {
         monthlyBtn.className = "flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition";
         globalBtn.className = "flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition";
     }
-
     loadLeaderboard();
 };
 
@@ -211,16 +205,8 @@ saveIdBtn.addEventListener('click', () => {
         const userId = userIdInput.value.trim();
         const userContact = userContactInput.value.trim();
 
-        if (!userId) {
-            alert(t.alertNoId);
-            userIdInput.focus();
-            return;
-        }
-        if (!userContact) {
-            alert(t.alertNoContact);
-            userContactInput.focus();
-            return;
-        }
+        if (!userId) { alert(t.alertNoId); userIdInput.focus(); return; }
+        if (!userContact) { alert(t.alertNoContact); userContactInput.focus(); return; }
 
         checkAndSaveUser(userId, userContact);
     }
@@ -243,38 +229,22 @@ async function checkAndSaveUser(userId, userContact) {
 
         localStorage.setItem('prediction_user_id', userId);
         localStorage.setItem('prediction_user_contact', userContact);
-        
         userIdInput.disabled = true;
-        
-        if (contactContainer) {
-            contactContainer.style.display = 'none';
-        }
-        
+        if (contactContainer) contactContainer.style.display = 'none';
         saveIdBtn.textContent = t.saveBtnLocked;
 
-        let currentPoints = 0;
-        let currentMonthlyPoints = 0;
-        let creationTime = new Date().getTime();
-
-        if (userSnap.exists()) {
-            currentPoints = userSnap.data().totalPoints || 0;
-            currentMonthlyPoints = userSnap.data().monthlyPoints || 0;
-            creationTime = userSnap.data().createdAt || creationTime; 
-        }
+        let currentPoints = userSnap.exists() ? (userSnap.data().totalPoints || 0) : 0;
+        let currentMonthlyPoints = userSnap.exists() ? (userSnap.data().monthlyPoints || 0) : 0;
+        let creationTime = userSnap.exists() ? (userSnap.data().createdAt || Date.now()) : Date.now();
 
         await setDoc(userRef, { 
-            userId: userId, 
-            contact: userContact,
-            totalPoints: currentPoints,
-            monthlyPoints: currentMonthlyPoints,
-            createdAt: creationTime 
+            userId, contact: userContact, totalPoints: currentPoints, monthlyPoints: currentMonthlyPoints, createdAt: creationTime 
         }, { merge: true });
 
         alert(t.alertSuccessId);
         loadLeaderboard();
-
     } catch (e) {
-        console.error(e);
+        console.error("Error saving user:", e);
         alert(t.alertErrorId);
     }
 }
@@ -286,8 +256,8 @@ async function loadMatches() {
 
     try {
         const querySnapshot = await getDocs(collection(db, "matches"));
-        
         let userPredictions = {};
+        
         if (currentUserId) {
             const predSnap = await getDocs(collection(db, "predictions"));
             predSnap.forEach(docSnap => {
@@ -299,7 +269,6 @@ async function loadMatches() {
         }
 
         container.innerHTML = "";
-
         if (querySnapshot.empty) {
             container.innerHTML = `<div class="glass p-6 rounded-xl text-center text-slate-500">${t.noMatches}</div>`;
             return;
@@ -308,13 +277,11 @@ async function loadMatches() {
         querySnapshot.forEach((docSnap) => {
             const match = docSnap.data();
             const matchId = docSnap.id;
-            
             const isLocked = match.isLocked === true;
             const userChoice = userPredictions[matchId] || null;
 
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
-            
             const homeTeamName = match.homeTeam || "Home";
             const awayTeamName = match.awayTeam || "Away";
 
@@ -324,25 +291,19 @@ async function loadMatches() {
                 <div class="flex items-center justify-between">
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
-                            <img src="${homeLogo}" 
-                                 onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
-                                 class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                            <img src="${homeLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${homeTeamName}</span>
                     </div>
-
                     <div class="text-center w-1/3 space-y-1">
                         <span class="text-[10px] uppercase font-bold ${isLocked ? 'text-rose-400 bg-rose-950/80 border-rose-900/50' : 'text-sky-400 bg-sky-950/80 border-sky-900/50'} px-3 py-1 rounded-full border shadow">
-                            ${isLocked ? (currentLang === 'ar' ? '🔴 مغلقة (مقفلة)' : '🔴 Closed (Locked)') : (currentLang === 'ar' ? '🟢 مفتوحة للتوقع' : '🟢 Open for Prediction')}
+                            ${isLocked ? (currentLang === 'ar' ? '🔴 مغلقة' : '🔴 Closed') : (currentLang === 'ar' ? '🟢 مفتوحة' : '🟢 Open')}
                         </span>
                         <div class="text-xs text-slate-500 font-semibold">VS</div>
                     </div>
-
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
-                            <img src="${awayLogo}" 
-                                 onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
-                                 class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                            <img src="${awayLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${awayTeamName}</span>
                     </div>
@@ -352,23 +313,15 @@ async function loadMatches() {
             const actions = document.createElement('div');
             actions.className = "flex gap-2 pt-2";
             
-            const homeLabelCustom = match.homeTeamWin && match.homeTeamWin.trim() !== "" ? match.homeTeamWin : `${homeTeamName} Win`;
-            const awayLabelCustom = match.awayTeamWin && match.awayTeamWin.trim() !== "" ? match.awayTeamWin : `${awayTeamName} Win`;
-
-            const opts = [
-                { l: homeLabelCustom, v: '1' }, 
-                { l: t.drawBtn, v: 'X' }, 
-                { l: awayLabelCustom, v: '2' }
-            ];
+            const homeLabel = match.homeTeamWin || `${homeTeamName} Win`;
+            const awayLabel = match.awayTeamWin || `${awayTeamName} Win`;
+            const opts = [{ l: homeLabel, v: '1' }, { l: t.drawBtn, v: 'X' }, { l: awayLabel, v: '2' }];
 
             opts.forEach(opt => {
                 const isSelected = userChoice === opt.v;
                 const btn = document.createElement('button');
                 
-                let btnStyle = 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300';
-                if (isSelected) {
-                    btnStyle = 'bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30';
-                }
+                let btnStyle = isSelected ? 'bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30' : 'bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300';
                 if (isLocked) {
                     btnStyle = isSelected ? 'bg-sky-700/60 text-white border-sky-600 cursor-not-allowed' : 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed';
                 }
@@ -384,7 +337,7 @@ async function loadMatches() {
             card.appendChild(actions);
             container.appendChild(card);
         });
-    } catch (e) { console.error(e); }
+    } catch (e) { console.error("Error loading matches:", e); }
 }
 
 async function submitPrediction(matchId, choice, btnElement) {
@@ -392,25 +345,15 @@ async function submitPrediction(matchId, choice, btnElement) {
     const userContact = localStorage.getItem('prediction_user_contact');
     const t = translations[currentLang];
 
-    if (!userId || !userContact) { 
-        alert(t.alertNoSave); 
-        userIdInput.focus(); 
-        return; 
-    }
+    if (!userId || !userContact) { alert(t.alertNoSave); userIdInput.focus(); return; }
 
     try {
         await setDoc(doc(db, "predictions", `${userId}_${matchId}`), {
             userId, matchId, prediction: choice, timestamp: new Date()
         });
-        
-        const userRef = doc(db, "leaderboard", userId);
-        const userSnap = await getDoc(userRef);
-        if (!userSnap.exists()) {
-            await setDoc(userRef, { userId, contact: userContact, totalPoints: 0, monthlyPoints: 0, createdAt: new Date().getTime() });
-        }
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => {
-            b.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300 text-white truncate px-1";
+            b.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-slate-900/80 border-slate-700 text-white truncate px-1";
         });
         btnElement.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30 truncate px-1";
         
@@ -430,102 +373,60 @@ async function loadLeaderboard() {
         const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"), limit(50));
         const snap = await getDocs(q);
 
-        let myData = null;
-        let myRank = "-";
-        
-        if (currentUserId) {
-            const allSnap = await getDocs(collection(db, "leaderboard"));
-            let allPlayers = [];
-            allSnap.forEach(d => allPlayers.push(d.data()));
-
-            allPlayers.sort((a, b) => {
-                const pA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
-                const pB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
-                if (pB !== pA) return pB - pA;
-                return (a.createdAt || Date.now()) - (b.createdAt || Date.now());
-            });
-
-            let globalIndex = 1;
-            for (let player of allPlayers) {
-                if (player.userId === currentUserId) {
-                    myData = player;
-                    myRank = globalIndex;
-                    break;
-                }
-                globalIndex++;
-            }
-        }
-
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">${t.noRankings}</p>`;
-        } else {
-            let players = [];
-            snap.forEach(docSnap => players.push(docSnap.data()));
-
-            players.sort((a, b) => {
-                const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
-                const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
-                if (pointsB !== pointsA) return pointsB - pointsA; 
-                return (a.createdAt || Date.now()) - (b.createdAt || Date.now());
-            });
-
-            let rank = 1;
-            let tableHtml = `<table class="w-full text-left text-xs">`;
-
-            players.forEach(data => {
-                const isMe = data.userId === currentUserId;
-                const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
-
-                tableHtml += `
-                    <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
-                        <td class="py-2.5 px-2">#${rank}</td>
-                        <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
-                        <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
-                    </tr>`;
-                rank++;
-            });
-            tableHtml += `</table>`;
-            tableContainer.innerHTML = tableHtml;
+            return;
         }
 
-        if (myCardContainer) {
-            if (currentUserId) {
-                if (myData) {
-                    const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
-                    const rankTitle = currentRankType === 'global' ? (currentLang === 'ar' ? 'الترتيب العام' : 'Principal Rank') : (currentLang === 'ar' ? 'ترتيب مدرب الشهر' : 'Manager of the Month Rank');
+        let players = [];
+        snap.forEach(docSnap => players.push(docSnap.data()));
 
-                    myCardContainer.innerHTML = `
-                        <div class="flex items-center gap-3">
-                            <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">
-                                #${myRank}
-                            </div>
-                            <div>
-                                <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
-                                <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
-                            </div>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? (currentLang === 'ar' ? 'المجموع' : 'Total Points') : (currentLang === 'ar' ? 'نقاط الشهر' : 'Monthly Points')}</div>
-                            <div class="text-lg font-black text-cyan-400">${myPts} pts</div>
-                        </div>
-                    `;
-                } else {
-                    myCardContainer.innerHTML = `
-                        <div class="text-xs text-amber-400 py-1">
-                            ⚠️ ${currentLang === 'ar' ? `المعرف (${currentUserId}) غير موجود في الترتيب بعد. توقع الآن!` : `ID (${currentUserId}) not found in rankings yet. Make a prediction!`}
-                        </div>
-                    `;
-                }
-            } else {
+        let rank = 1;
+        let myData = null;
+        let myRank = "-";
+        let tableHtml = `<table class="w-full text-left text-xs">`;
+
+        players.forEach(data => {
+            const isMe = data.userId === currentUserId;
+            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
+
+            if (isMe) {
+                myData = data;
+                myRank = rank;
+            }
+
+            tableHtml += `
+                <tr class="${isMe ? 'bg-sky-500/20 border-l-2 border-sky-400 font-bold text-sky-300' : 'text-slate-300'} border-b border-slate-800/60">
+                    <td class="py-2.5 px-2">#${rank}</td>
+                    <td class="py-2.5 px-2">${data.userId} ${isMe ? '👑' : ''}</td>
+                    <td class="py-2.5 px-2 text-right text-cyan-400">${currentPts} pts</td>
+                </tr>`;
+            rank++;
+        });
+        tableHtml += `</table>`;
+        tableContainer.innerHTML = tableHtml;
+
+        if (myCardContainer && currentUserId) {
+            if (myData) {
+                const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                const rankTitle = currentRankType === 'global' ? (currentLang === 'ar' ? 'الترتيب العام' : 'Principal Rank') : (currentLang === 'ar' ? 'ترتيب مدرب الشهر' : 'Manager of the Month Rank');
+
                 myCardContainer.innerHTML = `
-                    <div class="text-xs text-slate-400 py-1">
-                        🔍 ${currentLang === 'ar' ? 'أدخل واحفظ معرفك أعلاه لتتبع ترتيبك الشخصي.' : 'Enter and save your ID above to track your personal rank.'}
+                    <div class="flex items-center gap-3">
+                        <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">#${myRank}</div>
+                        <div>
+                            <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
+                            <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? 'Total Points' : 'Monthly Points'}</div>
+                        <div class="text-lg font-black text-cyan-400">${myPts} pts</div>
                     </div>
                 `;
+            } else {
+                myCardContainer.innerHTML = `<div class="text-xs text-amber-400 py-1">⚠️ ID (${currentUserId}) not found in top 50 rankings yet.</div>`;
             }
         }
-
-    } catch (e) { 
-        console.error(e); 
-    }
+    } catch (e) { console.error("Error loading leaderboard:", e); }
 }
