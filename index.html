@@ -66,18 +66,10 @@
         }
 
         @keyframes floatBlobs {
-            0% {
-                transform: translate(0px, 0px) scale(1);
-            }
-            33% {
-                transform: translate(50px, -80px) scale(1.1);
-            }
-            66% {
-                transform: translate(-40px, 60px) scale(0.9);
-            }
-            100% {
-                transform: translate(30px, 40px) scale(1.05);
-            }
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(50px, -80px) scale(1.1); }
+            66% { transform: translate(-40px, 60px) scale(0.9); }
+            100% { transform: translate(30px, 40px) scale(1.05); }
         }
 
         #splashScreen {
@@ -160,12 +152,19 @@
         </div>
     </div>
 
-    <!-- Top Menu Button -->
+    <!-- Top Menu & Language Toggle Buttons -->
     <div class="max-w-3xl mx-auto flex justify-between items-center mb-2">
         <button id="openSidebarBtn" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-sm flex items-center gap-2 transition shadow-lg">
             <span>☰</span> Menu
         </button>
-        <div class="text-xs text-slate-400">One Ligue v2.0</div>
+        
+        <div class="flex items-center gap-2">
+            <!-- زر تبديل اللغة -->
+            <button id="langToggleBtn" onclick="toggleLanguage()" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-xs transition shadow-lg">
+                العربية 🇩🇿
+            </button>
+            <div class="text-xs text-slate-400 hidden sm:block">One Ligue v2.5</div>
+        </div>
     </div>
 
     <!-- Sidebar Drawer -->
