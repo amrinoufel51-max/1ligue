@@ -21,7 +21,70 @@ const saveIdBtn = document.getElementById('saveIdBtn');
 // متغير لتحديد نوع الترتيب الحالي ('global' أو 'monthly')
 let currentRankType = 'global';
 
+// نظام الترجمة واللغات (إنجليزي / عربي)
+const translations = {
+    en: {
+        saveBtnLocked: "Identity Locked 🔒 (Change ID)",
+        saveBtnUnlock: "Save Identity 💾",
+        alertNoId: "⚠️ Please enter your unique ID!",
+        alertNoContact: "⚠️ Please enter your phone number or email so we can contact you if you win!",
+        alertTakenId: "❌ This ID is already taken by another player! Please choose a unique name.",
+        alertSuccessId: "✅ Identity saved successfully! Your contact details are securely registered.",
+        alertErrorId: "❌ Error saving user data.",
+        alertNoSave: "⚠️ Please save your ID and Contact info first!",
+        alertSuccessPred: "✅ Prediction saved!",
+        alertErrorPred: "❌ Error saving prediction.",
+        noMatches: "No matches available.",
+        noRankings: "No rankings yet.",
+        drawBtn: "Draw 🤝"
+    },
+    ar: {
+        saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
+        saveBtnUnlock: "حفظ الهوية 💾",
+        alertNoId: "⚠️ يرجى إدخال معرف فريد خاص بك!",
+        alertNoContact: "⚠️ يرجى إدخال رقم هاتفك أو بريدك الإلكتروني لنتواصل معك إذا فزت!",
+        alertTakenId: "❌ هذا المعرف محجوز من طرف لاعب آخر! يرجى اختيار اسم فريد.",
+        alertSuccessId: "✅ تم حفظ الهوية بنجاح! معلومات الاتصال مسجلة بأمان.",
+        alertErrorId: "❌ خطأ في حفظ بيانات المستخدم.",
+        alertNoSave: "⚠️ يرجى حفظ المعرف ومعلومات الاتصال أولاً!",
+        alertSuccessPred: "✅ تم حفظ التوقع!",
+        alertErrorPred: "❌ خطأ في حفظ التوقع.",
+        noMatches: "لا توجد مباريات متاحة حالياً.",
+        noRankings: "لا توجد ترتيبات حتى الآن.",
+        drawBtn: "تعادل 🤝"
+    }
+};
+
+let currentLang = localStorage.getItem("app_lang") || "en";
+
+// دالة تبديل اللغة
+window.toggleLanguage = function() {
+    currentLang = currentLang === "en" ? "ar" : "en";
+    localStorage.setItem("app_lang", currentLang);
+    applyLanguage();
+    loadMatches(); // إعادة تحميل المباريات لتحديث أسماء الأزرار المترجمة
+    loadLeaderboard();
+};
+
+function applyLanguage() {
+    document.documentElement.dir = currentLang === "ar" ? "rtl" : "ltr";
+    document.documentElement.lang = currentLang;
+
+    // تحديث زر تغيير اللغة في الواجهة إن وجد
+    const langBtn = document.getElementById('langToggleBtn');
+    if (langBtn) {
+        langBtn.innerText = currentLang === "en" ? "العربية 🇩🇿" : "English 🇬🇧";
+    }
+
+    // تحديث النصوص الثابتة بناءً على عناصر الـ HTML إن وُجدت
+    const savedId = localStorage.getItem('prediction_user_id');
+    if (saveIdBtn) {
+        saveIdBtn.textContent = savedId ? translations[currentLang].saveBtnLocked : translations[currentLang].saveBtnUnlock;
+    }
+}
+
 window.addEventListener('DOMContentLoaded', () => {
+    applyLanguage();
     const savedId = localStorage.getItem('prediction_user_id');
     const savedContact = localStorage.getItem('prediction_user_contact');
 
@@ -33,13 +96,13 @@ window.addEventListener('DOMContentLoaded', () => {
             contactContainer.style.display = 'none';
         }
 
-        saveIdBtn.textContent = "Identity Locked 🔒 (Change ID)";
+        saveIdBtn.textContent = translations[currentLang].saveBtnLocked;
     }
     loadMatches();
     loadLeaderboard();
 });
 
-// دالة عالمية للتبديل بين الترتيب العام وترتيب الشهر ليتم استدعاؤها من index.html
+// دالة عالمية للتبديل بين الترتيب العام وترتيب الشهر
 window.showRank = function(type) {
     currentRankType = type;
     const globalBtn = document.getElementById('globalRankBtn');
@@ -58,22 +121,23 @@ window.showRank = function(type) {
 
 // زر الحفظ
 saveIdBtn.addEventListener('click', () => {
+    const t = translations[currentLang];
     if (userIdInput.disabled) {
         userIdInput.disabled = false;
         userIdInput.focus();
-        saveIdBtn.textContent = "Save Identity 💾";
+        saveIdBtn.textContent = t.saveBtnUnlock;
         localStorage.removeItem('prediction_user_id');
     } else {
         const userId = userIdInput.value.trim();
         const userContact = userContactInput.value.trim();
 
         if (!userId) {
-            alert("⚠️ Please enter your unique ID!");
+            alert(t.alertNoId);
             userIdInput.focus();
             return;
         }
         if (!userContact) {
-            alert("⚠️ Please enter your phone number or email so we can contact you if you win!");
+            alert(t.alertNoContact);
             userContactInput.focus();
             return;
         }
@@ -84,6 +148,7 @@ saveIdBtn.addEventListener('click', () => {
 
 // حفظ البيانات في قاعدة البيانات
 async function checkAndSaveUser(userId, userContact) {
+    const t = translations[currentLang];
     try {
         const userRef = doc(db, "leaderboard", userId);
         const userSnap = await getDoc(userRef);
@@ -91,7 +156,7 @@ async function checkAndSaveUser(userId, userContact) {
         if (userSnap.exists()) {
             const savedLocalId = localStorage.getItem('prediction_user_id');
             if (savedLocalId !== userId) {
-                alert("❌ This ID is already taken by another player! Please choose a unique name.");
+                alert(t.alertTakenId);
                 userIdInput.focus();
                 return;
             }
@@ -106,7 +171,7 @@ async function checkAndSaveUser(userId, userContact) {
             contactContainer.style.display = 'none';
         }
         
-        saveIdBtn.textContent = "Identity Locked 🔒 (Change ID)";
+        saveIdBtn.textContent = t.saveBtnLocked;
 
         let currentPoints = 0;
         let currentMonthlyPoints = 0;
@@ -126,22 +191,22 @@ async function checkAndSaveUser(userId, userContact) {
             createdAt: creationTime 
         }, { merge: true });
 
-        alert("✅ Identity saved successfully! Your contact details are securely registered.");
+        alert(t.alertSuccessId);
         loadLeaderboard();
 
     } catch (e) {
         console.error(e);
-        alert("❌ Error saving user data.");
+        alert(t.alertErrorId);
     }
 }
 
-// 1. جلب المباريات مع تفقد القفل اليدوي من الآدمن (isLocked) واسترجاع توقعات المستخدم السابقة
+// 1. جلب المباريات وعرض أزرار التوقع بأسماء الفرق الفعلية (Real Madrid Win / Barcelona Win)
 async function loadMatches() {
     const container = document.getElementById('matchesContainer');
     const currentUserId = localStorage.getItem('prediction_user_id');
+    const t = translations[currentLang];
 
     try {
-        // جلب المباريات والتوقعات الخاصة بالمستخدم دفعة واحدة (إن كان مسجلاً)
         const querySnapshot = await getDocs(collection(db, "matches"));
         
         let userPredictions = {};
@@ -158,7 +223,7 @@ async function loadMatches() {
         container.innerHTML = "";
 
         if (querySnapshot.empty) {
-            container.innerHTML = `<div class="glass p-6 rounded-xl text-center text-slate-500">No matches available.</div>`;
+            container.innerHTML = `<div class="glass p-6 rounded-xl text-center text-slate-500">${t.noMatches}</div>`;
             return;
         }
 
@@ -171,6 +236,10 @@ async function loadMatches() {
 
             const homeLogo = match.homeLogo ? match.homeLogo.trim() : '';
             const awayLogo = match.awayLogo ? match.awayLogo.trim() : '';
+            
+            // أسماء الفرق الديناميكية القادمة من الفايربيز
+            const homeTeamName = match.homeTeam || "Home";
+            const awayTeamName = match.awayTeam || "Away";
 
             const card = document.createElement('div');
             card.className = "glass p-5 rounded-2xl space-y-4 shadow-xl border border-sky-500/20";
@@ -182,12 +251,12 @@ async function loadMatches() {
                                  onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
                                  class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
-                        <span class="font-bold text-sm text-white">${match.homeTeam}</span>
+                        <span class="font-bold text-sm text-white">${homeTeamName}</span>
                     </div>
 
                     <div class="text-center w-1/3 space-y-1">
                         <span class="text-[10px] uppercase font-bold ${isLocked ? 'text-rose-400 bg-rose-950/80 border-rose-900/50' : 'text-sky-400 bg-sky-950/80 border-sky-900/50'} px-3 py-1 rounded-full border shadow">
-                            ${isLocked ? '🔴 Closed (Locked)' : '🟢 Open for Prediction'}
+                            ${isLocked ? (currentLang === 'ar' ? '🔴 مغلقة (مقفلة)' : '🔴 Closed (Locked)') : (currentLang === 'ar' ? '🟢 مفتوحة للتوقع' : '🟢 Open for Prediction')}
                         </span>
                         <div class="text-xs text-slate-500 font-semibold">VS</div>
                     </div>
@@ -198,14 +267,20 @@ async function loadMatches() {
                                  onerror="this.onerror=null; this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" 
                                  class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
-                        <span class="font-bold text-sm text-white">${match.awayTeam}</span>
+                        <span class="font-bold text-sm text-white">${awayTeamName}</span>
                     </div>
                 </div>
             `;
 
             const actions = document.createElement('div');
             actions.className = "flex gap-2 pt-2";
-            const opts = [{l: 'Home Win', v: '1'}, {l: 'Draw', v: 'X'}, {l: 'Away Win', v: '2'}];
+            
+            // تخصيص خيارات التوقع بأسمای الفرق الحقيقية مباشرة
+            const opts = [
+                { l: `${homeTeamName} Win`, v: '1' }, 
+                { l: t.drawBtn, v: 'X' }, 
+                { l: `${awayTeamName} Win`, v: '2' }
+            ];
 
             opts.forEach(opt => {
                 const isSelected = userChoice === opt.v;
@@ -219,7 +294,7 @@ async function loadMatches() {
                     btnStyle = isSelected ? 'bg-sky-700/60 text-white border-sky-600 cursor-not-allowed' : 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed';
                 }
 
-                btn.className = `flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${btnStyle}`;
+                btn.className = `flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition truncate px-1 ${btnStyle}`;
                 btn.textContent = opt.l;
                 
                 if (!isLocked) {
@@ -237,9 +312,10 @@ async function loadMatches() {
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
     const userContact = localStorage.getItem('prediction_user_contact');
+    const t = translations[currentLang];
 
     if (!userId || !userContact) { 
-        alert("⚠️ Please save your ID and Contact info first!"); 
+        alert(t.alertNoSave); 
         userIdInput.focus(); 
         return; 
     }
@@ -256,28 +332,27 @@ async function submitPrediction(matchId, choice, btnElement) {
         }
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => {
-            b.className = "flex-1 py-2.5 rounded-xl text-xs font-bold border transition bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300 text-white";
+            b.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-slate-900/80 border-slate-700 hover:border-sky-400 hover:text-sky-300 text-white truncate px-1";
         });
-        btnElement.className = "flex-1 py-2.5 rounded-xl text-xs font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30";
+        btnElement.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30 truncate px-1";
         
-        alert(`✅ Prediction saved!`);
+        alert(t.alertSuccessPred);
         loadLeaderboard();
-    } catch (e) { alert("❌ Error saving prediction."); }
+    } catch (e) { alert(t.alertErrorPred); }
 }
 
-// 3. جلب الترتيب العام وترتيب الشهر مع حصر العرض في أول 50 مشتركاً في الجدول العام
+// 3. جلب الترتيب العام وترتيب الشهر
 async function loadLeaderboard() {
     const tableContainer = document.getElementById('leaderboardContainer');
     const myCardContainer = document.getElementById('myRankCard');
     const currentUserId = localStorage.getItem('prediction_user_id');
+    const t = translations[currentLang];
 
     try {
-        // جلب وترتيب البيانات من فايربيس مع حصر القائمة العامة في 50 عنصر لتخفيف الحمل
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"), limit(50));
         const snap = await getDocs(q);
 
-        // جلب بيانات المستخدم الحالي حصرياً للبطاقة الخاصة به (إن وُجد خارج الـ 50 الأوائل)
         let myData = null;
         let myRank = "-";
         
@@ -286,7 +361,6 @@ async function loadLeaderboard() {
             let allPlayers = [];
             allSnap.forEach(d => allPlayers.push(d.data()));
 
-            // إعادة الفرز الكلي لتحديد الترتيب الدقيق للمستخدم الحالي
             allPlayers.sort((a, b) => {
                 const pA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
                 const pB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
@@ -306,12 +380,11 @@ async function loadLeaderboard() {
         }
 
         if (snap.empty) {
-            tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">No rankings yet.</p>`;
+            tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">${t.noRankings}</p>`;
         } else {
             let players = [];
             snap.forEach(docSnap => players.push(docSnap.data()));
 
-            // ترتيب دقيق لأول 50 مشتركاً مع تطبيق قاعدة كسر التعادل (وقت التسجيل)
             players.sort((a, b) => {
                 const pointsA = currentRankType === 'global' ? (a.totalPoints || 0) : (a.monthlyPoints || 0);
                 const pointsB = currentRankType === 'global' ? (b.totalPoints || 0) : (b.monthlyPoints || 0);
@@ -338,12 +411,11 @@ async function loadLeaderboard() {
             tableContainer.innerHTML = tableHtml;
         }
 
-        // تحديث المربع الشخصي للمستخدم الحالي
         if (myCardContainer) {
             if (currentUserId) {
                 if (myData) {
                     const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
-                    const rankTitle = currentRankType === 'global' ? 'Principal Rank' : 'Manager of the Month Rank';
+                    const rankTitle = currentRankType === 'global' ? (currentLang === 'ar' ? 'الترتيب العام' : 'Principal Rank') : (currentLang === 'ar' ? 'ترتيب مدرب الشهر' : 'Manager of the Month Rank');
 
                     myCardContainer.innerHTML = `
                         <div class="flex items-center gap-3">
@@ -356,21 +428,21 @@ async function loadLeaderboard() {
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? 'Total Points' : 'Monthly Points'}</div>
+                            <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? (currentLang === 'ar' ? 'المجموع' : 'Total Points') : (currentLang === 'ar' ? 'نقاط الشهر' : 'Monthly Points')}</div>
                             <div class="text-lg font-black text-cyan-400">${myPts} pts</div>
                         </div>
                     `;
                 } else {
                     myCardContainer.innerHTML = `
                         <div class="text-xs text-amber-400 py-1">
-                            ⚠️ ID (${currentUserId}) not found in rankings yet. Make a prediction!
+                            ⚠️ ${currentLang === 'ar' ? `المعرف (${currentUserId}) غير موجود في الترتيب بعد. توقع الآن!` : `ID (${currentUserId}) not found in rankings yet. Make a prediction!`}
                         </div>
                     `;
                 }
             } else {
                 myCardContainer.innerHTML = `
                     <div class="text-xs text-slate-400 py-1">
-                        🔍 Enter and save your ID above to track your personal rank.
+                        🔍 ${currentLang === 'ar' ? 'أدخل واحفظ معرفك أعلاه لتتبع ترتيبك الشخصي.' : 'Enter and save your ID above to track your personal rank.'}
                     </div>
                 `;
             }
