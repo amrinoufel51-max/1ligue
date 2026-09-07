@@ -293,7 +293,7 @@ async function loadMatches() {
                 <div class="flex items-center justify-between">
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
-                            <img src="${homeLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                            <img src="${homeLogo}" referrerpolicy="no-referrer" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${homeTeamName}</span>
                     </div>
@@ -305,7 +305,7 @@ async function loadMatches() {
                     </div>
                     <div class="flex flex-col items-center gap-2 w-1/3 text-center">
                         <div class="relative z-10 w-16 h-16 flex items-center justify-center">
-                            <img src="${awayLogo}" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
+                            <img src="${awayLogo}" referrerpolicy="no-referrer" onerror="this.src='https://cdn-icons-png.flaticon.com/512/53/53283.png';" class="w-full h-full object-contain bg-slate-950/80 p-2 rounded-2xl border border-slate-700 shadow-md">
                         </div>
                         <span class="font-bold text-sm text-white">${awayTeamName}</span>
                     </div>
@@ -387,7 +387,6 @@ async function loadLeaderboard() {
         let myData = null;
         let myRank = "-";
         
-        // جدول منسق ومقسّم بعناية مع ألوان ومحاذاة تامة تناسب اللغات (RTL / LTR)
         let tableHtml = `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">`;
         tableHtml += `<thead><tr class="border-b border-slate-800 text-slate-400 bg-slate-900/40">
             <th class="py-3 px-3 w-12 text-center">#</th>
