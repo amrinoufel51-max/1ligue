@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jsDelivr Link Generator | One Ligue</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #020617; color: white; font-family: 'Segoe UI', sans-serif; }
+        .glass { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(14px); border: 1px solid rgba(56, 189, 248, 0.15); }
+    </style>
+</head>
+<body class="p-4 md:p-12 min-h-screen flex items-center justify-center">
+
+    <div class="glass max-w-xl w-full p-6 rounded-2xl space-y-6 shadow-2xl border border-sky-500/30">
+        <div>
+            <h1 class="text-xl font-black text-sky-400 mb-1">⚡ GitHub to jsDelivr Converter</h1>
+            <p class="text-slate-400 text-xs">حط رابط غيت هب العادي، وساهم في توليد رابط CDN الثابت الخاص بـ Firestore.</p>
+        </div>
+
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs uppercase tracking-widest text-sky-400 font-semibold mb-1">GitHub Link (Blob or Raw)</label>
+                <input type="text" id="githubInput" placeholder="https://github.com/username/repo/blob/main/image.png" 
+                    class="w-full bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 focus:border-sky-400 outline-none transition text-white text-sm">
+            </div>
+
+            <button onclick="convertToJsDelivr()" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 py-3 rounded-xl font-bold transition shadow-lg shadow-sky-500/20">
+                Generate jsDelivr Link 🚀
+            </button>
+        </div>
+
+        <div id="resultContainer" class="hidden space-y-2">
+            <label class="block text-xs uppercase tracking-widest text-emerald-400 font-semibold mb-1">Generated jsDelivr Link (For Firestore)</label>
+            <div class="flex gap-2">
+                <input type="text" id="resultOutput" readonly 
+                    class="w-full bg-slate-950/80 border border-emerald-500/40 rounded-xl px-4 py-3 text-emerald-300 text-xs font-mono outline-none select-all">
+                <button onclick="copyLink()" class="bg-emerald-500 hover:bg-emerald-600 text-slate-950 px-4 py-3 rounded-xl font-bold text-xs transition">
+                    Copy 📋
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function convertToJsDelivr() {
+            let input = document.getElementById('githubInput').value.trim();
+            if (!input) return alert('الرجاء إدخال رابط غيت هب أولاً!');
+
+            // تنظيف الرابط وتحويله تدريجياً
+            // مثال مدخل: https://github.com/user/repo/blob/main/folder/img.png
+            // الناتج المطلوب: https://cdn.jsdelivr.net/gh/user/repo@main/folder/img.png
+            
+            let cleanUrl = input
+                .replace('github.com', 'cdn.jsdelivr.net/gh')
+                .replace('/blob/', '@')
+                .replace('/raw/', '@')
+                .split('?')[0]; // إزالة أي بارامترات زائدة
+
+            if (!cleanUrl.includes('cdn.jsdelivr.net')) {
+                alert('الرابط المدخل غير صالح أو ليس رابط GitHub صحيح!');
+                return;
+            }
+
+            document.getElementById('resultOutput').value = cleanUrl;
+            document.getElementById('resultContainer').classList.remove('hidden');
+        }
+
+        function copyLink() {
+            const output = document.getElementById('resultOutput');
+            output.select();
+            document.execCommand('copy');
+            alert('تم نسخ الرابط بنجاح! حطه مباشرة في Firestore 🚀');
+        }
+    </script>
+</body>
+</html>
