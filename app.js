@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -60,7 +60,8 @@ const translations = {
         navMenuTitle: "⚡ Navigation Menu",
         navFooter: "Built for Football Predictors ⚽",
         whatsappLabel: "WhatsApp / Phone Number",
-        pointsLabel: "pts"
+        pointsLabel: "pts",
+        totalPlayersLabel: "Total Registered Players: "
     },
     ar: {
         saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
@@ -101,7 +102,8 @@ const translations = {
         navMenuTitle: "⚡ قائمة التنقل",
         navFooter: "مبني لعشاق التوقعات ⚽",
         whatsappLabel: "رقم الواتساب / الهاتف",
-        pointsLabel: "نقاط"
+        pointsLabel: "نقاط",
+        totalPlayersLabel: "إجمالي المشتركين المسجلين: "
     }
 };
 
@@ -164,6 +166,8 @@ function applyLanguage() {
     updateTextById('contactModalText', t.contactText);
     updateTextById('whatsappLabelText', t.whatsappLabel);
     updateTextById('contactModalBtn', t.closeModal);
+    
+    updateTotalPlayersCount();
 }
 
 window.addEventListener('DOMContentLoaded', () => {
@@ -180,6 +184,31 @@ window.addEventListener('DOMContentLoaded', () => {
     loadMatches();
     loadLeaderboard();
 });
+
+async function updateTotalPlayersCount() {
+    const t = translations[currentLang];
+    try {
+        const collRef = collection(db, "leaderboard");
+        const snapshot = await getCountFromServer(collRef);
+        const total = snapshot.data().count;
+        
+        let counterEl = document.getElementById('totalPlayersCountText');
+        if (!counterEl) {
+            const rankingsHeader = document.getElementById('rankingsTitleText');
+            if (rankingsHeader && rankingsHeader.parentElement) {
+                counterEl = document.createElement('div');
+                counterEl.id = 'totalPlayersCountText';
+                counterEl.className = "text-xs text-sky-400 font-semibold mb-2 px-1";
+                rankingsHeader.parentElement.insertBefore(counterEl, rankingsHeader.nextSibling);
+            }
+        }
+        if (counterEl) {
+            counterEl.innerHTML = `👥 ${t.totalPlayersLabel}<span class="text-white font-bold">${total}</span>`;
+        }
+    } catch (e) {
+        console.error("Error getting total players count:", e);
+    }
+}
 
 window.showRank = function(type) {
     currentRankType = type;
@@ -245,6 +274,7 @@ async function checkAndSaveUser(userId, userContact) {
 
         alert(t.alertSuccessId);
         loadLeaderboard();
+        updateTotalPlayersCount();
     } catch (e) {
         console.error("Error saving user:", e);
         alert(t.alertErrorId);
@@ -374,6 +404,8 @@ async function loadLeaderboard() {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"), limit(50));
         const snap = await getDocs(q);
+
+        updateTotalPlayersCount();
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">${t.noRankings}</p>`;
