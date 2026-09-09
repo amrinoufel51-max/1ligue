@@ -400,8 +400,14 @@ async function loadLeaderboard() {
 
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
-        // جلب جميع اللاعبين مرتبين تنازلياً حسب النقاط لحساب الترتيب الحقيقي بدقة
-        const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"));
+        
+        // الترتيب المزدوج (طريقة الفانتازي): النقاط تنازلياً، وإذا تعادلوا تاريخ التسجيل تصاعدياً (الأقدم يسبق)
+        const q = query(
+            collection(db, "leaderboard"), 
+            orderBy(sortField, "desc"), 
+            orderBy("createdAt", "asc")
+        );
+        
         const snap = await getDocs(q);
 
         updateTotalPlayersCount();
@@ -418,15 +424,13 @@ async function loadLeaderboard() {
         let myData = null;
         let myRank = "-";
 
-        // البحث عن رتبة اللاعب الحالي في القائمة الكاملة
         players.forEach((data, index) => {
             if (data.userId === currentUserId) {
                 myData = data;
-                myRank = index + 1; // الترتيب الحقيقي مهما كان متأخراً
+                myRank = index + 1;
             }
         });
 
-        // اقتطاع أول 50 لاعباً فقط للعرض في الجدول للحفاظ على خفة الموقع
         const topPlayers = players.slice(0, 50);
 
         let tableHtml = `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">`;
