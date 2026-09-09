@@ -54,7 +54,6 @@ const translations = {
         contactPlaceholder: "Enter WhatsApp number or Email...",
         upcomingMatches: "⚽ Upcoming Matches",
         rankingsTitle: "🏆 Rankings & Leaderboard",
-        rankingsToggle: "▼ Click to open",
         principalRank: "Principal Rank 🏆",
         monthlyRank: "Manager of the Month 🎖️",
         navMenuTitle: "⚡ Navigation Menu",
@@ -96,7 +95,6 @@ const translations = {
         contactPlaceholder: "أدخل رقم الواتساب أو البريد الإلكتروني...",
         upcomingMatches: "⚽ المباريات القادمة",
         rankingsTitle: "🏆 التصنيفات لوحة المتصدرين",
-        rankingsToggle: "▼ اضغط للفتح",
         principalRank: "الترتيب الرئيسي 🏆",
         monthlyRank: "مدرب الشهر 🎖️",
         navMenuTitle: "⚡ قائمة التنقل",
@@ -145,7 +143,7 @@ function applyLanguage() {
     updateTextById('playerIdLabelText', t.playerIdLabel);
     updateTextById('contactLabelText', t.contactLabel);
     updateTextById('upcomingMatchesTitle', t.upcomingMatches);
-    updateTextById('rankingsTitleText', t.rankingsToggle ? `<span>🏆 ${t.rankingsTitle}</span><span class="text-xs text-slate-400 group-open:rotate-180 transition">${t.rankingsToggle}</span>` : '');
+    updateTextById('rankingsTitleText', `🏆 ${t.rankingsTitle}`);
     updateTextById('globalRankBtn', t.principalRank);
     updateTextById('monthlyRankBtn', t.monthlyRank);
     updateTextById('navMenuTitleText', `⚡ ${t.navMenuTitle}`);
@@ -198,7 +196,7 @@ async function updateTotalPlayersCount() {
             if (rankingsHeader && rankingsHeader.parentElement) {
                 counterEl = document.createElement('div');
                 counterEl.id = 'totalPlayersCountText';
-                counterEl.className = "text-xs text-sky-400 font-semibold mb-2 px-1";
+                counterEl.className = "text-xs text-sky-400 font-semibold mb-2";
                 rankingsHeader.parentElement.insertBefore(counterEl, rankingsHeader.nextSibling);
             }
         }
