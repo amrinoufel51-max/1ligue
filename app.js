@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -400,23 +400,35 @@ async function loadLeaderboard() {
 
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
-        const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"), limit(50));
+        // جلب جميع اللاعبين مرتبين تنازلياً حسب النقاط لحساب الترتيب الحقيقي بدقة
+        const q = query(collection(db, "leaderboard"), orderBy(sortField, "desc"));
         const snap = await getDocs(q);
 
         updateTotalPlayersCount();
 
         if (snap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">${t.noRankings}</p>`;
+            if (myCardContainer) myCardContainer.innerHTML = "";
             return;
         }
 
         let players = [];
         snap.forEach(docSnap => players.push(docSnap.data()));
 
-        let rank = 1;
         let myData = null;
         let myRank = "-";
-        
+
+        // البحث عن رتبة اللاعب الحالي في القائمة الكاملة
+        players.forEach((data, index) => {
+            if (data.userId === currentUserId) {
+                myData = data;
+                myRank = index + 1; // الترتيب الحقيقي مهما كان متأخراً
+            }
+        });
+
+        // اقتطاع أول 50 لاعباً فقط للعرض في الجدول للحفاظ على خفة الموقع
+        const topPlayers = players.slice(0, 50);
+
         let tableHtml = `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">`;
         tableHtml += `<thead><tr class="border-b border-slate-800 text-slate-400 bg-slate-900/40">
             <th class="py-3 px-3 w-12 text-center">#</th>
@@ -424,14 +436,10 @@ async function loadLeaderboard() {
             <th class="py-3 px-3 text-end">${currentLang === 'ar' ? 'النقاط' : 'Points'}</th>
         </tr></thead><tbody>`;
 
-        players.forEach(data => {
+        topPlayers.forEach((data, index) => {
+            const rank = index + 1;
             const isMe = data.userId === currentUserId;
             const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
-
-            if (isMe) {
-                myData = data;
-                myRank = rank;
-            }
 
             let rankBadgeClass = "text-slate-400 font-semibold";
             if (rank === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
@@ -444,7 +452,6 @@ async function loadLeaderboard() {
                     <td class="py-3 px-3 text-start truncate max-w-[140px] sm:max-w-[200px]">${data.userId} ${isMe ? '👑' : ''}</td>
                     <td class="py-3 px-3 text-end font-black text-cyan-400">${currentPts} <span class="text-[10px] text-slate-400 font-normal">${t.pointsLabel}</span></td>
                 </tr>`;
-            rank++;
         });
         tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
@@ -468,7 +475,7 @@ async function loadLeaderboard() {
                     </div>
                 `;
             } else {
-                myCardContainer.innerHTML = `<div class="text-xs text-amber-400 py-1">⚠️ ID (${currentUserId}) not found in top 50 rankings yet.</div>`;
+                myCardContainer.innerHTML = `<div class="text-xs text-amber-400 py-1">⚠️ ID (${currentUserId}) not found in database yet.</div>`;
             }
         }
     } catch (e) { console.error("Error loading leaderboard:", e); }
