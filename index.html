@@ -4,13 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>One Ligue | Predict & Win</title>
-
-    <!-- Google AdSense Verification Script -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7707211382156675" crossorigin="anonymous"></script>
-
-    <!-- Google AMP Auto Ads Script -->
-    <script async custom-element="amp-auto-ads" src="https://cdn.ampproject.org/v0/amp-auto-ads-0.1.js"></script>
-
+    <!-- كود إعلانات شبكة CPM -->
+    <script src="https://pl31236503.profitableratecpmnetwork.com/29/e3/9d/29e39d64eaf59b09c40bd60d3c473b74.js"></script>
     <!-- Meta Pixel Code -->
 <script>
   !function(f,b,e,v,n,t,s)
@@ -156,10 +151,6 @@
 </head>
 <body class="p-4 md:p-8 relative">
 
-    <!-- AMP Auto Ads Tag placed right after body -->
-    <amp-auto-ads type="adsense" data-ad-client="ca-pub-7707211382156675">
-    </amp-auto-ads>
-
     <div class="mesh-bg">
         <div class="blob blob-1"></div>
         <div class="blob blob-2"></div>
@@ -205,9 +196,6 @@
                 <button onclick="openModal('privacyModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
                     <span id="navPrivacyText"><span>🔒 Privacy Policy</span> <span class="text-slate-500">›</span></span>
                 </button>
-                <button onclick="openModal('termsModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
-                    <span id="navTermsText"><span>📄 Terms of Service</span> <span class="text-slate-500">›</span></span>
-                </button>
                 <button onclick="openModal('contactModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
                     <span id="navContactText"><span>📞 Contact Us</span> <span class="text-slate-500">›</span></span>
                 </button>
@@ -219,9 +207,8 @@
         </div>
     </div>
 
-    <!-- About Modal -->
     <div id="aboutModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30 max-h-[90vh] overflow-y-auto">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 id="aboutModalTitle" class="text-lg font-bold text-sky-400">ℹ️ About Us</h3>
                 <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
@@ -233,52 +220,27 @@
         </div>
     </div>
 
-    <!-- Privacy Policy Modal -->
     <div id="privacyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30 max-h-[90vh] overflow-y-auto">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 id="privacyModalTitle" class="text-lg font-bold text-sky-400">🔒 Privacy Policy</h3>
                 <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
-            <div class="text-slate-300 text-xs md:text-sm leading-relaxed space-y-3">
-                <p><b>Effective date:</b> 2026</p>
-                <p>At <b>One Ligue</b>, accessible from our platform, the privacy of our visitors is of extreme importance to us. This Privacy Policy document outlines the types of personal information is collected and received by One Ligue and how it is used.</p>
-                <p><b>Information We Collect:</b> We collect information strictly limited to your Unique Player ID and your contact details (such as Instagram handle or email) provided voluntarily by you to save your match predictions and contact you if you win season or monthly prizes.</p>
-                <p><b>Cookies:</b> One Ligue uses local storage and basic cookies to store user preferences and track session states for the prediction interface.</p>
-                <p><b>Advertising Partners:</b> We may use third-party advertising companies (such as Google AdSense) to serve ads when you visit our website. These companies may use information about your visits to provide advertisements about goods and services of interest to you.</p>
-                <p><b>Consent:</b> By using our website, you hereby consent to our Privacy Policy and agree to its terms.</p>
-            </div>
+            <p id="privacyModalText" class="text-slate-300 text-sm leading-relaxed">
+                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
+            </p>
             <button id="privacyModalBtn" onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
     </div>
 
-    <!-- Terms of Service Modal -->
-    <div id="termsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="termsModalTitle" class="text-lg font-bold text-sky-400">📄 Terms of Service</h3>
-                <button onclick="closeModal('termsModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <div class="text-slate-300 text-xs md:text-sm leading-relaxed space-y-3">
-                <p><b>1. Acceptance of Terms:</b> By accessing and placing predictions on One Ligue, you agree to be bound by these Terms of Service.</p>
-                <p><b>2. User Responsibilities:</b> You are responsible for keeping your Unique ID secure. Any predictions submitted under your ID will be attributed to you.</p>
-                <p><b>3. Fair Play:</b> Creating multiple fake IDs or attempting to manipulate the ranking system or database entries will result in immediate disqualification from all seasonal and monthly rewards.</p>
-                <p><b>4. Prizes and Winners:</b> Winners of the Top 3 season finishes or Manager of the Month will be verified via their registered contact information (@one_liguedz).</p>
-                <p><b>5. Modifications:</b> We reserve the right to modify these terms at any time. Changes will be posted directly on this page.</p>
-            </div>
-            <button id="termsModalBtn" onclick="closeModal('termsModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
-        </div>
-    </div>
-
-    <!-- Contact Us Modal -->
     <div id="contactModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30 max-h-[90vh] overflow-y-auto">
+        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
             <div class="flex justify-between items-center border-b border-slate-800 pb-3">
                 <h3 id="contactModalTitle" class="text-lg font-bold text-sky-400">📞 Contact Us</h3>
                 <button onclick="closeModal('contactModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p id="contactModalText" class="text-slate-300 text-sm">
-                If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our official page on Instagram:
+                If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our page in Instagram:
             </p>
             <div class="bg-slate-950/80 border border-sky-500/40 p-4 rounded-xl text-center">
                 <span id="whatsappLabelText" class="text-xs text-slate-400 block mb-1">Instagram Page</span>
@@ -318,6 +280,22 @@
             <div id="matchesContainer" class="grid gap-4"></div>
         </section>
 
+        <!-- مساحة إعلان Adsterra (300x250 Banner) تحت المباريات وقبل الترتيب -->
+        <div class="flex justify-center my-4">
+            <div class="glass p-3 rounded-2xl flex justify-center items-center overflow-hidden border border-sky-500/20 shadow-lg">
+                <script>
+                  atOptions = {
+                    'key' : '8d75e66dee75bb03ca83fcc5dc91a820',
+                    'format' : 'iframe',
+                    'height' : 250,
+                    'width' : 300,
+                    'params' : {}
+                  };
+                </script>
+                <script src="https://www.highrevenueformat.com/8d75e66dee75bb03ca83fcc5dc91a820/invoke.js"></script>
+            </div>
+        </div>
+
         <section class="glass p-5 rounded-2xl shadow-2xl space-y-4">
             <h2 id="rankingsTitleText" class="text-lg font-bold text-sky-400">🏆 Rankings & Leaderboard</h2>
             
@@ -329,35 +307,6 @@
 
                 <div id="myRankCard" class="bg-gradient-to-r from-sky-900/50 to-blue-900/50 border border-sky-400/40 p-4 rounded-xl flex items-center justify-between shadow-lg"></div>
                 <div id="leaderboardContainer"></div>
-            </div>
-        </section>
-
-        <!-- قسم المقالات والأخبار الرياضية (لإرضاء شروط أدسنس) -->
-        <section class="glass p-5 rounded-2xl shadow-2xl space-y-4">
-            <h2 class="text-lg font-bold text-sky-400 flex items-center gap-2">📰 News & Football Insights</h2>
-            <div class="space-y-4 text-slate-300 text-sm leading-relaxed">
-                
-                <!-- مقال الجولة الحالية: مارسيليا ضد رين، توتنهام ضد إيفرتون، مانشستر سيتي ضد مانشستر يونايتد -->
-                <article class="bg-slate-950/50 border border-slate-800/80 p-4 rounded-xl space-y-2">
-                    <h3 class="text-base font-bold text-sky-300">Preview: High-Stakes Weekend Clashes Across Europe's Top Leagues</h3>
-                    <p class="text-xs text-slate-400">Published by One Ligue Team</p>
-                    <p>
-                        The upcoming fixture list brings immense excitement for football fans and prediction strategists alike. In the French Ligue 1, <b>Stade Rennais</b> prepares to host <b>Olympique de Marseille</b> in what promises to be a tactically intense battle as both sides look to solidify their early-season momentum. 
-                    </p>
-                    <p>
-                        Meanwhile, the English Premier League delivers two blockbuster fixtures. <b>Tottenham Hotspur</b> takes on <b>Everton</b> in a match where home advantage could prove decisive, while the city of Manchester halts for the fierce derby between <b>Manchester United</b> and <b>Manchester City</b>. Analyzing squad depth and recent form in these heavyweight matchups will be crucial for players aiming to secure maximum points on the One Ligue leaderboard this week.
-                    </p>
-                </article>
-
-                <!-- مقال تعليمي سابق -->
-                <article class="bg-slate-950/50 border border-slate-800/80 p-4 rounded-xl space-y-2">
-                    <h3 class="text-base font-bold text-sky-300">How to Master Match Predictions in One Ligue</h3>
-                    <p class="text-xs text-slate-400">Published by One Ligue Team</p>
-                    <p>
-                        Predicting football match outcomes isn't just about luck; it requires analyzing team form, head-to-head statistics, and tactical approaches. In One Ligue, consistency is the key to climbing the global leaderboard and securing the Manager of the Month award. Make sure to lock in your predictions early and keep track of squad updates before every matchday.
-                    </p>
-                </article>
-
             </div>
         </section>
 
