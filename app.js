@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, orderBy, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -44,7 +44,7 @@ const translations = {
         contactTitle: "📞 Contact Us",
         aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!",
         privacyText: "We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.",
-        contactText: "If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via the number below:",
+        contactText: "If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our Instagram page below:",
         gotIt: "Got it",
         closeModal: "Close",
         subTitle: "Predict the matches, climb the global rank.",
@@ -58,7 +58,7 @@ const translations = {
         monthlyRank: "Manager of the Month 🎖️",
         navMenuTitle: "⚡ Navigation Menu",
         navFooter: "Built for Football Predictors ⚽",
-        whatsappLabel: "WhatsApp / Phone Number",
+        whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
         totalPlayersLabel: "Total Registered Players: "
     },
@@ -85,7 +85,7 @@ const translations = {
         contactTitle: "📞 اتصل بنا",
         aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لتوقع نتائج المباريات والفوز بجوائز كبرى لصاحب المراكز الثلاثة الأولى في الموسم، إلى جانب جائزة <b>مدرب الشهر</b> الخاصة!",
         privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال لتسجيل توقعاتك والتواصل معك حال فوزك بالجوائز. لا نشارك بياناتك أبداً مع أطراف ثالثة.",
-        contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية أو أردت الاستفسار عن الجوائز، يمكنك التواصل معنا مباشرة عبر الرقم أدناه:",
+        contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية أو أردت الاستفسار عن الجوائز، يمكنك التواصل معنا مباشرة عبر صفحتنا على الإنستغرام:",
         gotIt: "حسناً",
         closeModal: "إغلاق",
         subTitle: "توقع المباريات وتصدر الترتيب العالمي.",
@@ -99,7 +99,7 @@ const translations = {
         monthlyRank: "مدرب الشهر 🎖️",
         navMenuTitle: "⚡ قائمة التنقل",
         navFooter: "مبني لعشاق التوقعات ⚽",
-        whatsappLabel: "رقم الواتساب / الهاتف",
+        whatsappLabel: "الصفحة الرسمية على إنستغرام",
         pointsLabel: "نقاط",
         totalPlayersLabel: "إجمالي المشتركين المسجلين: "
     }
@@ -171,7 +171,6 @@ function applyLanguage() {
 window.addEventListener('DOMContentLoaded', () => {
     applyLanguage();
     const savedId = localStorage.getItem('prediction_user_id');
-    const savedContact = localStorage.getItem('prediction_user_contact');
 
     if (savedId) {
         userIdInput.value = savedId;
@@ -288,13 +287,16 @@ async function loadMatches() {
         const querySnapshot = await getDocs(collection(db, "matches"));
         let userPredictions = {};
         
+        // استعلام مفلتر يطلب توقعات الزائر الحالي فقط لحماية الأداء
         if (currentUserId) {
-            const predSnap = await getDocs(collection(db, "predictions"));
+            const qPreds = query(
+                collection(db, "predictions"),
+                where("userId", "==", currentUserId)
+            );
+            const predSnap = await getDocs(qPreds);
             predSnap.forEach(docSnap => {
                 const data = docSnap.data();
-                if (data.userId === currentUserId) {
-                    userPredictions[data.matchId] = data.prediction;
-                }
+                userPredictions[data.matchId] = data.prediction;
             });
         }
 
@@ -401,7 +403,7 @@ async function loadLeaderboard() {
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         
-        // الترتيب المزدوج (طريقة الفانتازي): النقاط تنازلياً، وإذا تعادلوا تاريخ التسجيل تصاعدياً (الأقدم يسبق)
+        // الترتيب المزدوج المستند للـ Index الموجود في Firebase
         const q = query(
             collection(db, "leaderboard"), 
             orderBy(sortField, "desc"), 
