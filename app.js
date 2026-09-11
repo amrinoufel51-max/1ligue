@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -287,7 +287,6 @@ async function loadMatches() {
         const querySnapshot = await getDocs(collection(db, "matches"));
         let userPredictions = {};
         
-        // استعلام مفلتر يطلب توقعات الزائر الحالي فقط لحماية الأداء
         if (currentUserId) {
             const qPreds = query(
                 collection(db, "predictions"),
@@ -403,37 +402,23 @@ async function loadLeaderboard() {
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         
-        // الترتيب المزدوج المستند للـ Index الموجود في Firebase
-        const q = query(
+        // جلب أول 50 لاعباً يملكون أعلى نقاط في السيرفر باستخدام limit(50)
+        const qTop = query(
             collection(db, "leaderboard"), 
             orderBy(sortField, "desc"), 
-            orderBy("createdAt", "asc")
+            orderBy("createdAt", "asc"),
+            limit(50)
         );
         
-        const snap = await getDocs(q);
+        const topSnap = await getDocs(qTop);
 
         updateTotalPlayersCount();
 
-        if (snap.empty) {
+        if (topSnap.empty) {
             tableContainer.innerHTML = `<p class="text-slate-500 text-center py-2 text-xs">${t.noRankings}</p>`;
             if (myCardContainer) myCardContainer.innerHTML = "";
             return;
         }
-
-        let players = [];
-        snap.forEach(docSnap => players.push(docSnap.data()));
-
-        let myData = null;
-        let myRank = "-";
-
-        players.forEach((data, index) => {
-            if (data.userId === currentUserId) {
-                myData = data;
-                myRank = index + 1;
-            }
-        });
-
-        const topPlayers = players.slice(0, 50);
 
         let tableHtml = `<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">`;
         tableHtml += `<thead><tr class="border-b border-slate-800 text-slate-400 bg-slate-900/40">
@@ -442,34 +427,49 @@ async function loadLeaderboard() {
             <th class="py-3 px-3 text-end">${currentLang === 'ar' ? 'النقاط' : 'Points'}</th>
         </tr></thead><tbody>`;
 
-        topPlayers.forEach((data, index) => {
-            const rank = index + 1;
+        let rankIndex = 1;
+        topSnap.forEach(docSnap => {
+            const data = docSnap.data();
             const isMe = data.userId === currentUserId;
             const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
 
             let rankBadgeClass = "text-slate-400 font-semibold";
-            if (rank === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
-            else if (rank === 2) rankBadgeClass = "text-slate-200 font-bold";
-            else if (rank === 3) rankBadgeClass = "text-amber-600 font-bold";
+            if (rankIndex === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
+            else if (rankIndex === 2) rankBadgeClass = "text-slate-200 font-bold";
+            else if (rankIndex === 3) rankBadgeClass = "text-amber-600 font-bold";
 
             tableHtml += `
                 <tr class="${isMe ? 'bg-sky-500/20 border-sky-400/50 font-bold text-sky-200 shadow-inner' : 'text-slate-300 hover:bg-slate-900/30'} border-b border-slate-800/40 transition">
-                    <td class="py-3 px-3 text-center ${rankBadgeClass}">#${rank}</td>
+                    <td class="py-3 px-3 text-center ${rankBadgeClass}">#${rankIndex}</td>
                     <td class="py-3 px-3 text-start truncate max-w-[140px] sm:max-w-[200px]">${data.userId} ${isMe ? '👑' : ''}</td>
                     <td class="py-3 px-3 text-end font-black text-cyan-400">${currentPts} <span class="text-[10px] text-slate-400 font-normal">${t.pointsLabel}</span></td>
                 </tr>`;
+            rankIndex++;
         });
         tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
 
+        // حساب بطاقة اللاعب الحالي الدقيقة
         if (myCardContainer && currentUserId) {
-            if (myData) {
+            const userDocRef = doc(db, "leaderboard", currentUserId);
+            const userSnap = await getDoc(userDocRef);
+
+            if (userSnap.exists()) {
+                const myData = userSnap.data();
                 const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                
+                const qBetter = query(
+                    collection(db, "leaderboard"),
+                    where(sortField, ">", myPts)
+                );
+                const betterSnap = await getCountFromServer(qBetter);
+                const myExactRank = betterSnap.data().count + 1;
+
                 const rankTitle = currentRankType === 'global' ? (currentLang === 'ar' ? 'الترتيب العام' : 'Principal Rank') : (currentLang === 'ar' ? 'ترتيب مدرب الشهر' : 'Manager of the Month Rank');
 
                 myCardContainer.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">#${myRank}</div>
+                        <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">#${myExactRank}</div>
                         <div>
                             <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
                             <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
