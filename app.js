@@ -1,6 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -13,7 +12,6 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-const messaging = getMessaging(app);
 
 const userIdInput = document.getElementById('currentUserId');
 const userContactInput = document.getElementById('userContact');
@@ -242,26 +240,6 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// دالة طلب إذن وتفعيل الإشعارات تلقائياً في الخلفية بعد حفظ الهوية
-async function requestAndSaveNotificationToken(userId) {
-    try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            const currentToken = await getToken(messaging, { 
-                vapidKey: 'BB--suBDc7rzWfpV4yoEyRc12rZPX5OrpikmAWGtQvOuZu54Y5LP0uS0qpPzkfQCY1ZNz2MDbuqjZnXYiikmkLU' 
-            });
-
-            if (currentToken) {
-                await setDoc(doc(db, "leaderboard", userId), {
-                    fcmToken: currentToken
-                }, { merge: true });
-            }
-        }
-    } catch (error) {
-        console.error('Error getting notification token:', error);
-    }
-}
-
 async function checkAndSaveUser(userId, userContact) {
     const t = translations[currentLang];
     try {
@@ -290,9 +268,6 @@ async function checkAndSaveUser(userId, userContact) {
         await setDoc(userRef, { 
             userId, contact: userContact, totalPoints: currentPoints, monthlyPoints: currentMonthlyPoints, createdAt: creationTime 
         }, { merge: true });
-
-        // تفعيل الإشعارات تلقائياً في الخلفية فور حفظ الهوية بنجاح
-        requestAndSaveNotificationToken(userId);
 
         alert(t.alertSuccessId);
         loadLeaderboard();
@@ -427,6 +402,7 @@ async function loadLeaderboard() {
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         
+        // جلب أول 50 لاعباً يملكون أعلى نقاط في السيرفر باستخدام limit(50)
         const qTop = query(
             collection(db, "leaderboard"), 
             orderBy(sortField, "desc"), 
@@ -473,6 +449,7 @@ async function loadLeaderboard() {
         tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
 
+        // حساب بطاقة اللاعب الحالي الدقيقة
         if (myCardContainer && currentUserId) {
             const userDocRef = doc(db, "leaderboard", currentUserId);
             const userSnap = await getDoc(userDocRef);
