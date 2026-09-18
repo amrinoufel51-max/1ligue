@@ -19,7 +19,6 @@ const userIdInput = document.getElementById('currentUserId');
 const userContactInput = document.getElementById('userContact');
 const contactContainer = document.getElementById('contactContainer');
 const saveIdBtn = document.getElementById('saveIdBtn');
-const enableNotifBtn = document.getElementById('enableNotifBtn');
 
 let currentRankType = 'global';
 
@@ -243,36 +242,24 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// تفعيل إشعارات الـ Push Notifications وربطها بالـ VAPID Key
-if (enableNotifBtn) {
-    enableNotifBtn.addEventListener('click', async () => {
-        const userId = localStorage.getItem('prediction_user_id');
-        if (!userId) {
-            alert(currentLang === 'ar' ? '⚠️ يرجى حفظ معرفك (ID) أولاً قبل تفعيل التنبيهات.' : '⚠️ Please save your ID first before enabling notifications.');
-            return;
-        }
+// دالة طلب إذن وتفعيل الإشعارات تلقائياً في الخلفية بعد حفظ الهوية
+async function requestAndSaveNotificationToken(userId) {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const currentToken = await getToken(messaging, { 
+                vapidKey: 'BB--suBDc7rzWfpV4yoEyRc12rZPX5OrpikmAWGtQvOuZu54Y5LP0uS0qpPzkfQCY1ZNz2MDbuqjZnXYiikmkLU' 
+            });
 
-        try {
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                const currentToken = await getToken(messaging, { 
-                    vapidKey: 'BB--suBDc7rzWfpV4yoEyRc12rZPX5OrpikmAWGtQvOuZu54Y5LP0uS0qpPzkfQCY1ZNz2MDbuqjZnXYiikmkLU' 
-                });
-
-                if (currentToken) {
-                    await setDoc(doc(db, "leaderboard", userId), {
-                        fcmToken: currentToken
-                    }, { merge: true });
-
-                    alert(currentLang === 'ar' ? '✅ تم تفعيل التنبيهات بنجاح!' : '✅ Notifications enabled successfully!');
-                }
-            } else {
-                alert(currentLang === 'ar' ? '❌ تم رفض إذن الإشعارات.' : '❌ Notification permission denied.');
+            if (currentToken) {
+                await setDoc(doc(db, "leaderboard", userId), {
+                    fcmToken: currentToken
+                }, { merge: true });
             }
-        } catch (error) {
-            console.error('Error getting notification token:', error);
         }
-    });
+    } catch (error) {
+        console.error('Error getting notification token:', error);
+    }
 }
 
 async function checkAndSaveUser(userId, userContact) {
@@ -303,6 +290,9 @@ async function checkAndSaveUser(userId, userContact) {
         await setDoc(userRef, { 
             userId, contact: userContact, totalPoints: currentPoints, monthlyPoints: currentMonthlyPoints, createdAt: creationTime 
         }, { merge: true });
+
+        // تفعيل الإشعارات تلقائياً في الخلفية فور حفظ الهوية بنجاح
+        requestAndSaveNotificationToken(userId);
 
         alert(t.alertSuccessId);
         loadLeaderboard();
