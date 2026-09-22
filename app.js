@@ -56,7 +56,7 @@ const translations = {
         whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
         totalPlayersLabel: "Total Registered Players: ",
-        coreQuestionTitle: "Who will score FIRST in this match?",
+        coreQuestionTitle: "Who scored FIRST in this match?",
         optionNoGoal: "No Goal"
     },
     ar: {
@@ -96,7 +96,7 @@ const translations = {
         whatsappLabel: "الصفحة الرسمية على إنستغرام",
         pointsLabel: "نقاط",
         totalPlayersLabel: "إجمالي المشتركين المسجلين: ",
-        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
+        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
         optionNoGoal: "بدون أهداف (No Goal)"
     }
 };
@@ -331,7 +331,7 @@ async function loadMatches() {
             const actions = document.createElement('div');
             actions.className = "grid grid-cols-3 gap-2 pt-1";
             
-            // الأزرار تحمل أسماء الفرق الخالصة و "No Goal" كخيار ثالث
+            // أسماء الفرق الصحيحة و No Goal
             const opts = [
                 { l: homeTeamName, v: 'home' },
                 { l: awayTeamName, v: 'away' },
