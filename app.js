@@ -18,8 +18,6 @@ const userContactInput = document.getElementById('userContact');
 const contactContainer = document.getElementById('contactContainer');
 const saveIdBtn = document.getElementById('saveIdBtn');
 
-let currentRankType = 'global';
-
 const translations = {
     en: {
         saveBtnLocked: "Identity Locked 🔒 (Change ID)",
@@ -41,8 +39,8 @@ const translations = {
         aboutTitle: "ℹ️ About Us",
         privacyTitle: "🔒 Privacy Policy",
         contactTitle: "📞 Contact Us",
-        aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!",
-        privacyText: "We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.",
+        aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes!",
+        privacyText: "We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details.",
         contactText: "If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our Instagram page below:",
         gotIt: "Got it",
         closeModal: "Close",
@@ -52,15 +50,13 @@ const translations = {
         contactLabel: "Contact (Phone or Email - For Prizes)",
         contactPlaceholder: "Enter WhatsApp number or Email...",
         upcomingMatches: "⚽ Upcoming Matches",
-        rankingsTitle: "🏆 Rankings & Leaderboard",
-        principalRank: "Principal Rank 🏆",
-        monthlyRank: "Manager of the Month 🎖️",
+        rankingsTitle: "👑 King of the Day Leaderboard",
         navMenuTitle: "⚡ Navigation Menu",
         navFooter: "Built for Football Predictors ⚽",
         whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
         totalPlayersLabel: "Total Registered Players: ",
-        coreQuestionTitle: "Who will score FIRST in this match?",
+        coreQuestionTitle: "Who scored FIRST in this match?",
         optionYes: "Yes",
         optionNo: "No",
         optionDraw: "Draw 0-0"
@@ -85,9 +81,9 @@ const translations = {
         aboutTitle: "ℹ️ من نحن",
         privacyTitle: "🔒 سياسة الخصوصية",
         contactTitle: "📞 اتصل بنا",
-        aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لتوقع نتائج المباريات والفوز بجوائز كبرى لصاحب المراكز الثلاثة الأولى في الموسم، إلى جانب جائزة <b>مدرب الشهر</b> الخاصة!",
-        privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال لتسجيل توقعاتك والتواصل معك حال فوزك بالجوائز. لا نشارك بياناتك أبداً مع أطراف ثالثة.",
-        contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية أو أردت الاستفسار عن الجوائز، يمكنك التواصل معنا مباشرة عبر صفحتنا على الإنستغرام:",
+        aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لتوقع نتائج المباريات والفوز بجوائز كبرى!",
+        privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال لتسجيل توقعاتك والتواصل معك.",
+        contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية، يمكنك التواصل معنا مباشرة عبر صفحتنا على الإنستغرام:",
         gotIt: "حسناً",
         closeModal: "إغلاق",
         subTitle: "توقع المباريات وتصدر الترتيب العالمي.",
@@ -96,9 +92,7 @@ const translations = {
         contactLabel: "معلومات الاتصال (هاتف أو إيميل - للجوائز)",
         contactPlaceholder: "أدخل رقم الواتساب أو البريد الإلكتروني...",
         upcomingMatches: "⚽ المباريات القادمة",
-        rankingsTitle: "🏆 التصنيفات لوحة المتصدرين",
-        principalRank: "الترتيب الرئيسي 🏆",
-        monthlyRank: "مدرب الشهر 🎖️",
+        rankingsTitle: "👑 جدول ترتيب ملك اليوم",
         navMenuTitle: "⚡ قائمة التنقل",
         navFooter: "مبني لعشاق التوقعات ⚽",
         whatsappLabel: "الصفحة الرسمية على إنستغرام",
@@ -149,9 +143,7 @@ function applyLanguage() {
     updateTextById('playerIdLabelText', t.playerIdLabel);
     updateTextById('contactLabelText', t.contactLabel);
     updateTextById('upcomingMatchesTitle', t.upcomingMatches);
-    updateTextById('rankingsTitleText', `🏆 ${t.rankingsTitle}`);
-    updateTextById('globalRankBtn', t.principalRank);
-    updateTextById('monthlyRankBtn', t.monthlyRank);
+    updateTextById('rankingsTitleText', `👑 ${t.rankingsTitle}`);
     updateTextById('navMenuTitleText', `⚡ ${t.navMenuTitle}`);
     updateTextById('navAboutText', `<span>${t.about}</span><span class="text-slate-500">›</span>`);
     updateTextById('navPrivacyText', `<span>${t.privacy}</span><span class="text-slate-500">›</span>`);
@@ -168,7 +160,7 @@ function applyLanguage() {
 
     updateTextById('contactModalTitle', t.contactTitle);
     updateTextById('contactModalText', t.contactText);
-    updateTextById('whatsappLabelText', t.whatsappLabel);
+    updateTextById('instagramLabelText', t.whatsappLabel);
     updateTextById('contactModalBtn', t.closeModal);
     
     updateTotalPlayersCount();
@@ -213,21 +205,6 @@ async function updateTotalPlayersCount() {
     }
 }
 
-window.showRank = function(type) {
-    currentRankType = type;
-    const globalBtn = document.getElementById('globalRankBtn');
-    const monthlyBtn = document.getElementById('monthlyRankBtn');
-
-    if (type === 'global') {
-        globalBtn.className = "flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition";
-        monthlyBtn.className = "flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition";
-    } else {
-        monthlyBtn.className = "flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition";
-        globalBtn.className = "flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition";
-    }
-    loadLeaderboard();
-};
-
 saveIdBtn.addEventListener('click', () => {
     const t = translations[currentLang];
     if (userIdInput.disabled) {
@@ -268,16 +245,14 @@ async function checkAndSaveUser(userId, userContact) {
         if (contactContainer) contactContainer.style.display = 'none';
         saveIdBtn.textContent = t.saveBtnLocked;
 
-        let currentPoints = userSnap.exists() ? (userSnap.data().totalPoints || 0) : 0;
-        let currentMonthlyPoints = userSnap.exists() ? (userSnap.data().monthlyPoints || 0) : 0;
+        let currentDailyPoints = userSnap.exists() ? (userSnap.data().dailyPoints || 0) : 0;
         let creationTime = userSnap.exists() ? (userSnap.data().createdAt || now) : now;
         let lastPredTime = userSnap.exists() ? (userSnap.data().lastPredictionTime || now) : now;
 
         await setDoc(userRef, { 
             userId, 
             contact: userContact, 
-            totalPoints: currentPoints, 
-            monthlyPoints: currentMonthlyPoints, 
+            dailyPoints: currentDailyPoints, 
             createdAt: creationTime,
             lastPredictionTime: lastPredTime
         }, { merge: true });
@@ -432,11 +407,10 @@ async function loadLeaderboard() {
     const t = translations[currentLang];
 
     try {
-        const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
-        
+        // الاعتماد الحصري على dailyPoints والترتيب حسب الوقت لفك التعادل
         const qTop = query(
             collection(db, "leaderboard"), 
-            orderBy(sortField, "desc"), 
+            orderBy("dailyPoints", "desc"), 
             orderBy("lastPredictionTime", "asc"),
             limit(50)
         );
@@ -461,7 +435,7 @@ async function loadLeaderboard() {
         topSnap.forEach(docSnap => {
             const data = docSnap.data();
             const isMe = data.userId === currentUserId;
-            const currentPts = currentRankType === 'global' ? (data.totalPoints || 0) : (data.monthlyPoints || 0);
+            const currentPts = data.dailyPoints || 0;
 
             let rankBadgeClass = "text-slate-400 font-semibold";
             if (rankIndex === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
@@ -485,16 +459,16 @@ async function loadLeaderboard() {
 
             if (userSnap.exists()) {
                 const myData = userSnap.data();
-                const myPts = currentRankType === 'global' ? (myData.totalPoints || 0) : (myData.monthlyPoints || 0);
+                const myPts = myData.dailyPoints || 0;
                 
                 const qBetter = query(
                     collection(db, "leaderboard"),
-                    where(sortField, ">", myPts)
+                    where("dailyPoints", ">", myPts)
                 );
                 const betterSnap = await getCountFromServer(qBetter);
                 const myExactRank = betterSnap.data().count + 1;
 
-                const rankTitle = currentRankType === 'global' ? (currentLang === 'ar' ? 'الترتيب العام' : 'Principal Rank') : (currentLang === 'ar' ? 'ترتيب مدرب الشهر' : 'Manager of the Month Rank');
+                const rankTitle = currentLang === 'ar' ? 'ترتيب ملك اليوم' : 'King of the Day Rank';
 
                 myCardContainer.innerHTML = `
                     <div class="flex items-center gap-3">
@@ -505,7 +479,7 @@ async function loadLeaderboard() {
                         </div>
                     </div>
                     <div class="text-end">
-                        <div class="text-[10px] uppercase text-slate-400 tracking-wider">${currentRankType === 'global' ? 'Total Points' : 'Monthly Points'}</div>
+                        <div class="text-[10px] uppercase text-slate-400 tracking-wider">Daily Points</div>
                         <div class="text-lg font-black text-cyan-400">${myPts} ${t.pointsLabel}</div>
                     </div>
                 `;
