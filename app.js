@@ -8,7 +8,7 @@ const firebaseConfig = {
     storageBucket: "league-91565.firebasestorage.app",
     messagingSenderId: "923003244062",
     appId: "1:923003244062:web:a2bf91b86de0d1bf73a80f"
-}; 
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -56,10 +56,8 @@ const translations = {
         whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
         totalPlayersLabel: "Total Registered Players: ",
-        coreQuestionTitle: "Who scored FIRST in this match?",
-        optionYes: "Yes",
-        optionNo: "No",
-        optionDraw: "Draw 0-0"
+        coreQuestionTitle: "Who will score FIRST in this match?",
+        optionNoGoal: "No Goal"
     },
     ar: {
         saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
@@ -98,10 +96,8 @@ const translations = {
         whatsappLabel: "الصفحة الرسمية على إنستغرام",
         pointsLabel: "نقاط",
         totalPlayersLabel: "إجمالي المشتركين المسجلين: ",
-        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
-        optionYes: "نعم",
-        optionNo: "لا",
-        optionDraw: "تعادل 0-0"
+        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
+        optionNoGoal: "بدون أهداف (No Goal)"
     }
 };
 
@@ -335,10 +331,11 @@ async function loadMatches() {
             const actions = document.createElement('div');
             actions.className = "grid grid-cols-3 gap-2 pt-1";
             
+            // الأزرار تحمل أسماء الفرق الخالصة و "No Goal" كخيار ثالث
             const opts = [
-                { l: `${t.optionYes} (${homeTeamName})`, v: 'yes' },
-                { l: `${t.optionNo} (${awayTeamName})`, v: 'no' },
-                { l: t.optionDraw, v: 'draw_00' }
+                { l: homeTeamName, v: 'home' },
+                { l: awayTeamName, v: 'away' },
+                { l: t.optionNoGoal, v: 'no_goal' }
             ];
 
             opts.forEach(opt => {
@@ -407,7 +404,6 @@ async function loadLeaderboard() {
     const t = translations[currentLang];
 
     try {
-        // الاعتماد الحصري على dailyPoints والترتيب حسب الوقت لفك التعادل
         const qTop = query(
             collection(db, "leaderboard"), 
             orderBy("dailyPoints", "desc"), 
