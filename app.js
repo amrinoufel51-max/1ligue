@@ -370,7 +370,6 @@ async function loadMatches() {
     } catch (e) { console.error("Error loading matches:", e); }
 }
 
-// دالة إرسال الإجابة باستخدام توقيت السيرفر الرسمي (serverTimestamp) حصرياً
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
     const userContact = localStorage.getItem('prediction_user_contact');
@@ -386,7 +385,7 @@ async function submitPrediction(matchId, choice, btnElement) {
             return;
         }
 
-        const sTime = serverTimestamp(); // توقيت سيرفر فايربيس الرسمي والغير قابل للتلاعب
+        const sTime = serverTimestamp();
 
         await setDoc(doc(db, "predictions", `${matchId}_${userId}`), {
             userId: String(userId), 
@@ -418,6 +417,7 @@ async function loadLeaderboard() {
     const t = translations[currentLang];
 
     try {
+        // جلب أفضل 50 لاعباً مرتبين بالنقاط تنازلياً ثم بالأسبقية تصاعدياً
         const qTop = query(
             collection(db, "leaderboard"), 
             orderBy("dailyPoints", "desc"), 
@@ -442,10 +442,16 @@ async function loadLeaderboard() {
         </tr></thead><tbody>`;
 
         let rankIndex = 1;
+        let myExactRank = null;
+
         topSnap.forEach(docSnap => {
             const data = docSnap.data();
             const isMe = data.userId === currentUserId;
             const currentPts = data.dailyPoints || 0;
+
+            if (isMe) {
+                myExactRank = rankIndex;
+            }
 
             let rankBadgeClass = "text-slate-400 font-semibold";
             if (rankIndex === 1) rankBadgeClass = "text-amber-400 font-black text-sm";
@@ -463,6 +469,7 @@ async function loadLeaderboard() {
         tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
 
+        // تحديث الكارد الشخصي (Private Rank) بدقة تامة ومطابقة 100% لجدول الترتيب
         if (myCardContainer && currentUserId) {
             const userDocRef = doc(db, "leaderboard", currentUserId);
             const userSnap = await getDoc(userDocRef);
@@ -471,18 +478,28 @@ async function loadLeaderboard() {
                 const myData = userSnap.data();
                 const myPts = myData.dailyPoints || 0;
                 
-                const qBetter = query(
-                    collection(db, "leaderboard"),
-                    where("dailyPoints", ">", myPts)
-                );
-                const betterSnap = await getCountFromServer(qBetter);
-                const myExactRank = betterSnap.data().count + 1;
+                let exactRank = myExactRank;
+
+                // إذا لم يكن ضمن الـ 50 الأوائل المعروضين، نقوم بحسابه عبر جلب كامل الجدول
+                if (!exactRank) {
+                    const allLeaderboardSnap = await getDocs(query(collection(db, "leaderboard"), orderBy("dailyPoints", "desc"), orderBy("lastPredictionTime", "asc")));
+                    let calcRank = 1;
+                    let found = false;
+                    for (const d of allLeaderboardSnap.docs) {
+                        if (d.id === currentUserId) {
+                            found = true;
+                            break;
+                        }
+                        calcRank++;
+                    }
+                    exactRank = found ? calcRank : "+50";
+                }
 
                 const rankTitle = currentLang === 'ar' ? 'ترتيب ملك اليوم' : 'King of the Day Rank';
 
                 myCardContainer.innerHTML = `
                     <div class="flex items-center gap-3">
-                        <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">#${myExactRank}</div>
+                        <div class="bg-sky-500 text-slate-950 font-black px-3 py-2 rounded-lg text-sm shadow">#${exactRank}</div>
                         <div>
                             <div class="text-xs text-sky-300 font-semibold">${rankTitle}</div>
                             <div class="text-sm font-bold text-white">${myData.userId} 👑</div>
