@@ -28,9 +28,9 @@ const translations = {
         alertSuccessId: "✅ Identity saved successfully! Your contact details are securely registered.",
         alertErrorId: "❌ Error saving user data.",
         alertNoSave: "⚠️ Please save your ID and Contact info first!",
-        alertSuccessPred: "✅ Prediction saved!",
-        alertErrorPred: "❌ Error saving prediction.",
-        noMatches: "No matches available.",
+        alertSuccessPred: "✅ Answer saved!",
+        alertErrorPred: "❌ Error saving answer.",
+        noMatches: "No quick quizzes available.",
         noRankings: "No rankings yet.",
         menu: "Menu",
         about: "ℹ️ About Us",
@@ -39,20 +39,20 @@ const translations = {
         aboutTitle: "ℹ️ About Us",
         privacyTitle: "🔒 Privacy Policy",
         contactTitle: "📞 Contact Us",
-        aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes!",
+        aboutText: "<b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to solve quick quizzes and win major prizes!",
         privacyText: "We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details.",
         contactText: "If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our Instagram page below:",
         gotIt: "Got it",
         closeModal: "Close",
-        subTitle: "Predict the matches, climb the global rank.",
+        subTitle: "Solve the quick quiz, climb the global rank.",
         playerIdLabel: "Player Identity (Unique ID)",
         playerIdPlaceholder: "Enter your unique id...",
         contactLabel: "Contact (Phone or Email - For Prizes)",
         contactPlaceholder: "Enter WhatsApp number or Email...",
-        upcomingMatches: "⚽ Upcoming Matches",
+        upcomingMatches: "⚽ Active Quick Quizzes",
         rankingsTitle: "👑 King of the Day Leaderboard",
         navMenuTitle: "⚡ Navigation Menu",
-        navFooter: "Built for Football Predictors ⚽",
+        navFooter: "Built for Quiz Challengers ⚽",
         whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
         totalPlayersLabel: "Total Registered Players: ",
@@ -68,9 +68,9 @@ const translations = {
         alertSuccessId: "✅ تم حفظ الهوية بنجاح! معلومات الاتصال مسجلة بأمان.",
         alertErrorId: "❌ خطأ في حفظ بيانات المستخدم.",
         alertNoSave: "⚠️ يرجى حفظ المعرف ومعلومات الاتصال أولاً!",
-        alertSuccessPred: "✅ تم حفظ التوقع!",
-        alertErrorPred: "❌ خطأ في حفظ التوقع.",
-        noMatches: "لا توجد مباريات متاحة حالياً.",
+        alertSuccessPred: "✅ تم حفظ الإجابة!",
+        alertErrorPred: "❌ خطأ في حفظ الإجابة.",
+        noMatches: "لا توجد تحديات متاحة حالياً.",
         noRankings: "لا توجد ترتيبات حتى الآن.",
         menu: "القائمة",
         about: "ℹ️ من نحن",
@@ -79,24 +79,24 @@ const translations = {
         aboutTitle: "ℹ️ من نحن",
         privacyTitle: "🔒 سياسة الخصوصية",
         contactTitle: "📞 اتصل بنا",
-        aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لتوقع نتائج المباريات والفوز بجوائز كبرى!",
-        privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال لتسجيل توقعاتك والتواصل معك.",
+        aboutText: "<b>One Ligue</b> هي منصة تفاعلية مخصصة لعشاق كرة القدم لحل التحديات والمسابقات اليومية والفوز بجوائز كبرى!",
+        privacyText: "نحن نحترم خصوصيتك تماماً. البيانات التي نجمعها تقتصر على المعرف الفريد ومعلومات الاتصال.",
         contactText: "إذا كانت لديك أي أسئلة أو مشاكل تقنية، يمكنك التواصل معنا مباشرة عبر صفحتنا على الإنستغرام:",
         gotIt: "حسناً",
         closeModal: "إغلاق",
-        subTitle: "توقع المباريات وتصدر الترتيب العالمي.",
+        subTitle: "شارك في المسابقة وتصدر الترتيب العالمي.",
         playerIdLabel: "هوية اللاعب (المعرف الفريد)",
         playerIdPlaceholder: "أدخل المعرف الفريد الخاص بك...",
         contactLabel: "معلومات الاتصال (هاتف أو إيميل - للجوائز)",
         contactPlaceholder: "أدخل رقم الواتساب أو البريد الإلكتروني...",
-        upcomingMatches: "⚽ المباريات القادمة",
+        upcomingMatches: "⚽ الأسئلة والتحديات النشطة",
         rankingsTitle: "👑 جدول ترتيب ملك اليوم",
         navMenuTitle: "⚡ قائمة التنقل",
-        navFooter: "مبني لعشاق التوقعات ⚽",
+        navFooter: "مبني لعشاق التحديات ⚽",
         whatsappLabel: "الصفحة الرسمية على إنستغرام",
         pointsLabel: "نقاط",
         totalPlayersLabel: "إجمالي المشتركين المسجلين: ",
-        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
+        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
         optionNoGoal: "بدون أهداف (No Goal)"
     }
 };
@@ -219,7 +219,7 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// دالة الحفظ المحسنة والمحمية ضد الأخطاء
+// دالة الحفظ المحسنة (بحيث lastPredictionTime لا يتخذ وقت التسجيل الأول تلقائياً)
 async function checkAndSaveUser(userId, userContact) {
     const t = translations[currentLang];
     const cleanId = userId.trim();
@@ -247,13 +247,14 @@ async function checkAndSaveUser(userId, userContact) {
 
         let currentDailyPoints = 0;
         let creationTime = now;
-        let lastPredTime = now;
+        // إذا كان الحساب جديداً، نعطيه وقتاً قديماً (مثلاً قبل سنة) لكي لا يتصدر بقسوة قبل حل أي سؤال
+        let lastPredTime = new Date(0); 
 
         if (userSnap.exists()) {
             const data = userSnap.data();
             currentDailyPoints = Number(data.dailyPoints) || 0;
             creationTime = data.createdAt || now;
-            lastPredTime = data.lastPredictionTime || now;
+            lastPredTime = data.lastPredictionTime || new Date(0);
         }
 
         await setDoc(userRef, { 
@@ -371,6 +372,7 @@ async function loadMatches() {
     } catch (e) { console.error("Error loading matches:", e); }
 }
 
+// دالة إرسال الإجابة (هنا يتم تحديث lastPredictionTime حصرياً لوقت المشاركة الفعلية)
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
     const userContact = localStorage.getItem('prediction_user_contact');
@@ -381,16 +383,17 @@ async function submitPrediction(matchId, choice, btnElement) {
     const matchRef = doc(db, "matches", matchId);
     const matchSnap = await getDoc(matchRef);
     if (matchSnap.exists() && matchSnap.data().isLocked) {
-        alert(currentLang === 'ar' ? "⚠️ عذراً، تم قفل التوقعات لهذه المباراة!" : "⚠️ Sorry, predictions are locked for this match!");
+        alert(currentLang === 'ar' ? "⚠️ عذراً، تم إغلاق هذا التحدي!" : "⚠️ Sorry, this challenge is locked!");
         return;
     }
 
     try {
-        const now = new Date();
+        const now = new Date(); // وقت إرسال الإجابة الفعلي
         await setDoc(doc(db, "predictions", `${matchId}_${userId}`), {
             userId, matchId, prediction: choice, timestamp: now
         });
 
+        // تحديث وقت النشاط الفعلي للاعب لكي يرتفع في الترتيب عند التعادل في النقاط
         const userRef = doc(db, "leaderboard", userId);
         await setDoc(userRef, { lastPredictionTime: now }, { merge: true });
 
