@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
     <title>One Ligue | Predict & Win</title>
     
-    <!-- كود إعلانات شبكة CPM (مُحسّن مع خاصية async) -->
+    <!-- كود إعلانات شبكة CPM -->
     <script src="https://pl31236503.profitableratecpmnetwork.com/29/e3/9d/29e39d64eaf59b09c40bd60d3c473b74.js" async></script>
     
     <!-- Meta Pixel Code -->
@@ -56,34 +56,9 @@
             animation: floatBlobs 20s ease infinite alternate;
         }
 
-        .blob-1 {
-            width: 450px;
-            height: 450px;
-            background: #0284c7;
-            top: -10%;
-            left: -10%;
-            animation-duration: 18s;
-        }
-
-        .blob-2 {
-            width: 500px;
-            height: 500px;
-            background: #1d4ed8;
-            bottom: -20%;
-            right: -10%;
-            animation-duration: 25s;
-            animation-direction: alternate-reverse;
-        }
-
-        .blob-3 {
-            width: 350px;
-            height: 350px;
-            background: #06b6d4;
-            top: 40%;
-            left: 30%;
-            animation-duration: 22s;
-            opacity: 0.4;
-        }
+        .blob-1 { width: 450px; height: 450px; background: #0284c7; top: -10%; left: -10%; animation-duration: 18s; }
+        .blob-2 { width: 500px; height: 500px; background: #1d4ed8; bottom: -20%; right: -10%; animation-duration: 25s; animation-direction: alternate-reverse; }
+        .blob-3 { width: 350px; height: 350px; background: #06b6d4; top: 40%; left: 30%; animation-duration: 22s; opacity: 0.4; }
 
         @keyframes floatBlobs {
             0% { transform: translate(0px, 0px) scale(1); }
@@ -104,9 +79,7 @@
             animation: hideSplash 0.4s ease 1.5s forwards;
         }
 
-        @keyframes hideSplash {
-            to { opacity: 0; visibility: hidden; }
-        }
+        @keyframes hideSplash { to { opacity: 0; visibility: hidden; } }
 
         .splash-title span {
             display: inline-block;
@@ -129,16 +102,9 @@
         .splash-title span:nth-child(8) { animation-delay: 0.35s; }
         .splash-title span:nth-child(9) { animation-delay: 0.4s; }
 
-        @keyframes dropIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes dropIn { to { opacity: 1; transform: translateY(0); } }
 
-        .splash-sub {
-            opacity: 0;
-            animation: fadeIn 0.6s ease forwards;
-            animation-delay: 0.5s;
-        }
-
+        .splash-sub { opacity: 0; animation: fadeIn 0.6s ease forwards; animation-delay: 0.5s; }
         @keyframes fadeIn { to { opacity: 1; } }
 
         .glass {
@@ -147,9 +113,7 @@
             border: 1px solid rgba(56, 189, 248, 0.15);
         }
 
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
+        #sidebar { transition: transform 0.3s ease-in-out; }
     </style>
 </head>
 <body class="p-4 md:p-8 relative">
@@ -217,7 +181,7 @@
                 <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p id="aboutModalText" class="text-slate-300 text-sm leading-relaxed">
-                <b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!
+                <b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes!
             </p>
             <button id="aboutModalBtn" onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -230,7 +194,7 @@
                 <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p id="privacyModalText" class="text-slate-300 text-sm leading-relaxed">
-                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
+                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details.
             </p>
             <button id="privacyModalBtn" onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
         </div>
@@ -243,7 +207,7 @@
                 <button onclick="closeModal('contactModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
             </div>
             <p id="contactModalText" class="text-slate-300 text-sm">
-                If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our page in Instagram:
+                You can reach us directly via our Instagram page:
             </p>
             <div class="bg-slate-950/80 border border-sky-500/40 p-4 rounded-xl text-center">
                 <span id="instagramLabelText" class="text-xs text-slate-400 block mb-1">Instagram Page</span>
@@ -283,15 +247,11 @@
             <div id="matchesContainer" class="grid gap-4"></div>
         </section>
 
+        <!-- جدول الترتيب الوحيد: King of the Day -->
         <section class="glass p-5 rounded-2xl shadow-2xl space-y-4">
-            <h2 id="rankingsTitleText" class="text-lg font-bold text-sky-400">🏆 Rankings & Leaderboard</h2>
+            <h2 id="rankingsTitleText" class="text-lg font-bold text-sky-400 flex items-center gap-2">👑 King of the Day Leaderboard</h2>
             
             <div class="space-y-4">
-                <div class="flex gap-2">
-                    <button id="globalRankBtn" onclick="showRank('global')" class="flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition">Principal Rank 🏆</button>
-                    <button id="monthlyRankBtn" onclick="showRank('monthly')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition">Manager of the Month 🎖️</button>
-                </div>
-
                 <div id="myRankCard" class="bg-gradient-to-r from-sky-900/50 to-blue-900/50 border border-sky-400/40 p-4 rounded-xl flex items-center justify-between shadow-lg"></div>
                 <div id="leaderboardContainer"></div>
             </div>
