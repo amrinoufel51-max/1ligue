@@ -1,334 +1,349 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
-    <title>One Ligue | Predict & Win</title>
-    
-    <!-- كود إعلانات شبكة CPM (مُحسّن مع خاصية async) -->
-    <script src="https://pl31236503.profitableratecpmnetwork.com/29/e3/9d/29e39d64eaf59b09c40bd60d3c473b74.js" async></script>
-    
-    <!-- Meta Pixel Code -->
-    <script>
-      !function(f,b,e,v,n,t,s)
-      {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-      n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-      if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-      n.queue=[];t=b.createElement(e);t.async=!0;
-      t.src=v;s=b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t,s)}(window, document,'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-      fbq('init', '3732724466866034');
-      fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-      src="https://www.facebook.com/tr?id=3732724466866034&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>دوري التوقعات - King of the Day</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: #020617;
-            color: white;
-            font-family: 'Segoe UI', sans-serif;
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        .mesh-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            background: #020617;
-            overflow: hidden;
-        }
-
-        .blob {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            opacity: 0.6;
-            animation: floatBlobs 20s ease infinite alternate;
-        }
-
-        .blob-1 {
-            width: 450px;
-            height: 450px;
-            background: #0284c7;
-            top: -10%;
-            left: -10%;
-            animation-duration: 18s;
-        }
-
-        .blob-2 {
-            width: 500px;
-            height: 500px;
-            background: #1d4ed8;
-            bottom: -20%;
-            right: -10%;
-            animation-duration: 25s;
-            animation-direction: alternate-reverse;
-        }
-
-        .blob-3 {
-            width: 350px;
-            height: 350px;
-            background: #06b6d4;
-            top: 40%;
-            left: 30%;
-            animation-duration: 22s;
-            opacity: 0.4;
-        }
-
-        @keyframes floatBlobs {
-            0% { transform: translate(0px, 0px) scale(1); }
-            33% { transform: translate(50px, -80px) scale(1.1); }
-            66% { transform: translate(-40px, 60px) scale(0.9); }
-            100% { transform: translate(30px, 40px) scale(1.05); }
-        }
-
-        #splashScreen {
-            position: fixed;
-            inset: 0;
-            background: #020617;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            animation: hideSplash 0.4s ease 1.5s forwards;
-        }
-
-        @keyframes hideSplash {
-            to { opacity: 0; visibility: hidden; }
-        }
-
-        .splash-title span {
-            display: inline-block;
-            opacity: 0;
-            transform: translateY(-40px);
-            background: linear-gradient(to right, #38bdf8, #2563eb);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            animation: dropIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-
-        .splash-title span:nth-child(1) { animation-delay: 0.05s; }
-        .splash-title span:nth-child(2) { animation-delay: 0.1s; }
-        .splash-title span:nth-child(3) { animation-delay: 0.15s; }
-        .splash-title span:nth-child(4) { animation-delay: 0.2s; }
-        .splash-title span:nth-child(5) { animation-delay: 0.2s; }
-        .splash-title span:nth-child(6) { animation-delay: 0.25s; }
-        .splash-title span:nth-child(7) { animation-delay: 0.3s; }
-        .splash-title span:nth-child(8) { animation-delay: 0.35s; }
-        .splash-title span:nth-child(9) { animation-delay: 0.4s; }
-
-        @keyframes dropIn {
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .splash-sub {
-            opacity: 0;
-            animation: fadeIn 0.6s ease forwards;
-            animation-delay: 0.5s;
-        }
-
-        @keyframes fadeIn { to { opacity: 1; } }
-
-        .glass {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(56, 189, 248, 0.15);
-        }
-
-        #sidebar {
-            transition: transform 0.3s ease-in-out;
-        }
+        body { font-family: 'Cairo', sans-serif; }
     </style>
 </head>
-<body class="p-4 md:p-8 relative">
+<body class="bg-slate-950 text-slate-100 min-h-screen p-4 md:p-6 pb-20">
 
-    <div class="mesh-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="blob blob-3"></div>
-    </div>
-
-    <div id="splashScreen">
-        <div class="text-center space-y-3">
-            <h1 class="splash-title text-5xl md:text-6xl font-black tracking-wider flex justify-center">
-                <span>O</span><span>n</span><span>e</span><span>&nbsp;</span><span>L</span><span>i</span><span>g</span><span>u</span><span>e</span>
-            </h1>
-            <p id="subTitleText" class="splash-sub text-slate-400 text-xs md:text-sm tracking-widest uppercase">
-                Predict the matches, climb the global rank.
-            </p>
-        </div>
-    </div>
-
-    <div class="max-w-3xl mx-auto flex justify-between items-center mb-2">
-        <button id="openSidebarBtn" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-sm flex items-center gap-2 transition shadow-lg">
-            <span id="menuText"><span>☰</span> Menu</span>
-        </button>
-        
-        <div class="flex items-center gap-2">
-            <button id="langToggleBtn" onclick="toggleLanguage()" class="glass px-3 py-2 rounded-xl text-sky-400 hover:text-white font-bold text-xs transition shadow-lg">
-                العربية 🇩🇿
-            </button>
-            <div class="text-xs text-slate-400 hidden sm:block">One Ligue v2.5</div>
-        </div>
-    </div>
-
-    <div id="sidebarOverlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden transition-opacity"></div>
-    <div id="sidebar" class="fixed top-0 right-0 h-full w-80 bg-slate-900 border-l border-slate-800 z-50 p-6 flex flex-col justify-between shadow-2xl transform translate-x-full">
-        <div class="space-y-6">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <h2 id="navMenuTitleText" class="text-lg font-black text-sky-400">⚡ Navigation Menu</h2>
-                <button id="closeSidebarBtn" class="text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+    <!-- شاشة التسجيل / تسجيل الدخول (Auth Modal) -->
+    <div id="authModal" class="fixed inset-0 bg-slate-950/90 z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 max-w-md w-full p-6 rounded-2xl space-y-6 shadow-2xl text-center">
+            <div class="text-4xl">⚽</div>
+            <div class="space-y-2">
+                <h2 class="text-xl font-black text-rose-500">أهلاً بك في دوري التوقعات</h2>
+                <p class="text-xs text-slate-400">أدخل الـ ID ورقم هاتفك للدخول إلى حسابك أو إنشاء حساب جديد تلقائياً</p>
             </div>
 
-            <nav class="space-y-3">
-                <button onclick="openModal('aboutModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
-                    <span id="navAboutText"><span>ℹ️ About Us</span> <span class="text-slate-500">›</span></span>
-                </button>
-                <button onclick="openModal('privacyModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
-                    <span id="navPrivacyText"><span>🔒 Privacy Policy</span> <span class="text-slate-500">›</span></span>
-                </button>
-                <button onclick="openModal('contactModal')" class="w-full text-left bg-slate-950/50 hover:bg-slate-800 border border-slate-800/80 px-4 py-3 rounded-xl font-semibold text-sm transition flex items-center justify-between">
-                    <span id="navContactText"><span>📞 Contact Us</span> <span class="text-slate-500">›</span></span>
-                </button>
-            </nav>
-        </div>
-
-        <div id="navFooterText" class="text-center text-xs text-slate-500 border-t border-slate-800 pt-4">
-            Built for Football Predictors ⚽
-        </div>
-    </div>
-
-    <div id="aboutModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="aboutModalTitle" class="text-lg font-bold text-sky-400">ℹ️ About Us</h3>
-                <button onclick="closeModal('aboutModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <p id="aboutModalText" class="text-slate-300 text-sm leading-relaxed">
-                <b>One Ligue</b> is an interactive platform custom-built for football enthusiasts to predict match results and win major prizes for the Top 3 season finishers, alongside our special <b>Manager of the Month</b> award to keep the competition fierce all year round!
-            </p>
-            <button id="aboutModalBtn" onclick="closeModal('aboutModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
-        </div>
-    </div>
-
-    <div id="privacyModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="privacyModalTitle" class="text-lg font-bold text-sky-400">🔒 Privacy Policy</h3>
-                <button onclick="closeModal('privacyModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <p id="privacyModalText" class="text-slate-300 text-sm leading-relaxed">
-                We completely respect your privacy. The information we collect is strictly limited to your Unique ID and contact details, used solely to record your predictions and reach out to you if you win prizes. We never share your data with third parties.
-            </p>
-            <button id="privacyModalBtn" onclick="closeModal('privacyModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Got it</button>
-        </div>
-    </div>
-
-    <div id="contactModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass max-w-lg w-full p-6 rounded-2xl space-y-4 border border-sky-500/30">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-                <h3 id="contactModalTitle" class="text-lg font-bold text-sky-400">📞 Contact Us</h3>
-                <button onclick="closeModal('contactModal')" class="text-slate-400 hover:text-white font-bold">✕</button>
-            </div>
-            <p id="contactModalText" class="text-slate-300 text-sm">
-                If you have any questions, technical issues, or want to get in touch regarding prizes, you can reach us directly via our page in Instagram:
-            </p>
-            <div class="bg-slate-950/80 border border-sky-500/40 p-4 rounded-xl text-center">
-                <span id="instagramLabelText" class="text-xs text-slate-400 block mb-1">Instagram Page</span>
-                <a href="https://www.instagram.com/one_liguedz?stkn=ZzR4cDlnZW96aHB0" target="_blank" class="text-lg font-black text-sky-400 tracking-wider hover:underline">@one_liguedz</a>
-            </div>
-            <button id="contactModalBtn" onclick="closeModal('contactModal')" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-2.5 rounded-xl transition">Close</button>
-        </div>
-    </div>
-
-    <div class="max-w-3xl mx-auto space-y-6">
-        
-        <div class="text-center py-4">
-            <h1 onclick="location.reload()" class="cursor-pointer inline-block text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-blue-600 tracking-wider hover:opacity-80 transition select-none" title="Click to Refresh">
-                One Ligue
-            </h1>
-            <p class="text-slate-400 text-xs mt-1">Predict the matches, climb the global rank.</p>
-        </div>
-
-        <section class="glass p-5 rounded-2xl shadow-2xl space-y-3">
-            <div>
-                <label id="playerIdLabelText" class="block text-xs uppercase tracking-widest text-sky-400 font-semibold mb-1">Player Identity (Unique ID)</label>
-                <input type="text" id="currentUserId" placeholder="Enter your unique ID..." 
-                    class="w-full bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 focus:border-sky-400 outline-none transition text-white font-bold">
-            </div>
-
-            <div id="contactContainer">
-                <label id="contactLabelText" class="block text-xs uppercase tracking-widest text-sky-400 font-semibold mb-1">Contact Details (Instagram / Phone)</label>
-                <input type="text" id="userContact" placeholder="Enter WhatsApp number or Email..." 
-                    class="w-full bg-slate-950/60 border border-slate-700/60 rounded-xl px-4 py-3 focus:border-sky-400 outline-none transition text-white text-sm">
-            </div>
-
-            <button id="saveIdBtn" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 py-3 rounded-xl font-bold transition shadow-lg shadow-sky-500/20">Save Identity 💾</button>
-        </section>
-
-        <section class="space-y-4">
-            <h2 id="upcomingMatchesTitle" class="text-lg font-bold text-sky-400 flex items-center gap-2">⚽ Upcoming Matches</h2>
-            <div id="matchesContainer" class="grid gap-4"></div>
-        </section>
-
-        <section class="glass p-5 rounded-2xl shadow-2xl space-y-4">
-            <h2 id="rankingsTitleText" class="text-lg font-bold text-sky-400">🏆 Rankings & Leaderboard</h2>
-            
-            <div class="space-y-4">
-                <div class="flex gap-2">
-                    <button id="globalRankBtn" onclick="showRank('global')" class="flex-1 py-2.5 rounded-xl bg-sky-600 text-white font-bold text-xs shadow transition">Principal Rank 🏆</button>
-                    <button id="monthlyRankBtn" onclick="showRank('monthly')" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-400 font-bold text-xs shadow transition">Manager of the Month 🎖️</button>
+            <div class="space-y-4 text-right">
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">الـ ID الخاص بك (اسم المستخدم أو المعرف):</label>
+                    <input type="text" id="userIdInput" placeholder="مثال: Amri95" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-rose-500 font-bold">
                 </div>
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">رقم الهاتف (numero de téléphone):</label>
+                    <input type="tel" id="userPhoneInput" placeholder="مثال: 0612345678" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-rose-500 font-bold">
+                </div>
+            </div>
 
-                <div id="myRankCard" class="bg-gradient-to-r from-sky-900/50 to-blue-900/50 border border-sky-400/40 p-4 rounded-xl flex items-center justify-between shadow-lg"></div>
-                <div id="leaderboardContainer"></div>
+            <button id="loginRegisterBtn" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-rose-600/30 text-sm">
+                دخول / تسجيل حساب جديد 🚀
+            </button>
+            <p id="authErrorMsg" class="text-xs text-rose-400 font-semibold"></p>
+        </div>
+    </div>
+
+    <!-- المحتوى الرئيسي للموقع -->
+    <div class="max-w-xl mx-auto space-y-6">
+        
+        <!-- الهيدر ومعلومات المستخدم الحالي -->
+        <header class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between shadow-lg">
+            <div>
+                <h1 class="text-lg font-black text-rose-500">🏆 King of the Day</h1>
+                <p id="welcomeUserText" class="text-xs text-slate-400">مرحباً بك، جاري التحميل...</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleAboutModal()" class="bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-bold px-3 py-2 rounded-xl transition">
+                    عن المنصة ℹ️
+                </button>
+                <button id="logoutBtn" class="bg-slate-800 hover:bg-slate-700 text-rose-400 text-xs font-bold px-3 py-2 rounded-xl transition">
+                    خروج 🚪
+                </button>
+            </div>
+        </header>
+
+        <!-- سكشن السؤال الجوهري المميز للعلاقة التجارية -->
+        <div class="bg-gradient-to-r from-rose-950/60 via-slate-900 to-amber-950/60 border border-rose-500/30 p-5 rounded-2xl text-center space-y-2 shadow-xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 text-6xl opacity-10">⚽</div>
+            <span class="text-[11px] font-bold tracking-widest text-amber-400 uppercase">Signature Question</span>
+            <h2 class="text-xl md:text-2xl font-black text-white tracking-wide">
+                "مَنْ سَجَّلَ أَوَّلاً؟"
+            </h2>
+            <p class="text-xs text-slate-300 max-w-sm mx-auto leading-relaxed">
+                التوقع الذكي يعتمد على قراءة اللحظة الأولى. من يفكك شفرة الهدف الأسرع يتربع على القمة!
+            </p>
+        </div>
+
+        <!-- قسم المباريات والتوقعات (مع أسماء الفرق وأزرار السؤال الجوهري) -->
+        <section class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl space-y-4">
+            <h2 class="text-sm font-bold text-amber-400 flex items-center gap-2">
+                <span>⚡ مباريات اليوم والتوقعات</span>
+            </h2>
+            <div id="matchesContainer" class="space-y-3">
+                <p class="text-center text-xs text-slate-500 py-4">جاري تحميل المباريات...</p>
             </div>
         </section>
 
+        <!-- شروط اللعب والأحكام الذهبية -->
+        <section class="bg-slate-900/80 border border-slate-800/80 p-4 rounded-2xl space-y-2 text-xs text-slate-300">
+            <h3 class="font-bold text-rose-400 flex items-center gap-1.5">
+                <span>📜 شروط اللعب والأحكام الذهبية</span>
+            </h3>
+            <ul class="list-disc list-inside space-y-1 text-[11px] text-slate-400 leading-relaxed">
+                <li><strong class="text-slate-200">فترة الـ 10 دقائق الذهبية:</strong> تقفل التوقعات وتفتح وفق توقيتات حاسمة للمباريات.</li>
+                <li><strong class="text-slate-200">معيار الفوز والجائزة (1000 دج):</strong> صاحب النقاط الأعلى، وفي حال التعادل، السرعة هي الفيصل (الذي سجل إجابته أسرع في اليوم هو الأول).</li>
+                <li><strong class="text-slate-200">حالات التعادل السلبي (0-0):</strong> ترحّل الجائزة تلقائياً إلى 2000 دج للمباراة الموالية.</li>
+            </ul>
+        </section>
+
+        <!-- لوحة الترتيب الواحدة (King of the Day - Top 50 مصنفة بالنقاط ثم أسبقية الـ Timestamp) -->
+        <section class="bg-slate-900 border border-slate-800 p-5 rounded-2xl shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-sm font-bold text-emerald-400">👑 لوحة الترتيب - King of the Day</h2>
+                <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded-lg">أفضل 50 لاعباً</span>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-right text-xs">
+                    <thead>
+                        <tr class="border-b border-slate-800 text-slate-400">
+                            <th class="py-2.5 px-3">الترتيب</th>
+                            <th class="py-2.5 px-3">اللاعب (ID)</th>
+                            <th class="py-2.5 px-3 text-left">النقاط</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboardTableBody" class="divide-y divide-slate-800/50">
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-slate-500">جاري تحميل جدول الترتيب...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
-    <script>
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOverlay = document.getElementById('sidebarOverlay');
-        const openSidebarBtn = document.getElementById('openSidebarBtn');
-        const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    <!-- نافذة عن المنصة (Anti-Gambling) -->
+    <div id="aboutModal" class="fixed inset-0 bg-slate-950/90 z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-slate-900 border border-slate-800 max-w-md w-full p-6 rounded-2xl space-y-4 shadow-2xl text-right">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-black text-amber-400">ℹ️ عن منصة King of the Day</h3>
+                <button onclick="toggleAboutModal()" class="text-slate-400 hover:text-white text-lg font-bold">✕</button>
+            </div>
+            <div class="space-y-3 text-xs text-slate-300 leading-relaxed">
+                <p>
+                    منصة ترفيهية رياضية لاختبار الذكاء الكروي وقراءة مجريات اللعب بطريقة تنافسية نظيفة.
+                </p>
+                <div class="bg-rose-950/40 border border-rose-500/30 p-3 rounded-xl space-y-1">
+                    <span class="font-bold text-rose-400 block">🚫 التزام صارم ضد القمار (Anti-Gambling):</span>
+                    <p class="text-[11px] text-slate-300">
+                        نحن **ضد القمار تماماً** وبعيدون عن أي شبهة مراهنات. هدفنا حماية الشباب وتقديم ترفيه رياضي يعتمد على المهارة والتوقع النظيف بدون مخاطر مالية.
+                    </p>
+                </div>
+            </div>
+            <button onclick="toggleAboutModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 rounded-xl transition text-xs">
+                إغلاق
+            </button>
+        </div>
+    </div>
 
-        function toggleSidebar(open) {
-            if (open) {
-                sidebar.classList.remove('translate-x-full');
-                sidebarOverlay.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('translate-x-full');
-                sidebarOverlay.classList.add('hidden');
+    <!-- السكريبت البرمجي المنظم والحديث -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
+            authDomain: "league-91565.firebaseapp.com",
+            projectId: "league-91565",
+            storageBucket: "league-91565.firebasestorage.app",
+            messagingSenderId: "923003244062",
+            appId: "1:923003244062:web:a2bf91b86de0d1bf73a80f"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const authModal = document.getElementById('authModal');
+        const aboutModal = document.getElementById('aboutModal');
+        const userIdInput = document.getElementById('userIdInput');
+        const userPhoneInput = document.getElementById('userPhoneInput');
+        const loginRegisterBtn = document.getElementById('loginRegisterBtn');
+        const authErrorMsg = document.getElementById('authErrorMsg');
+        const welcomeUserText = document.getElementById('welcomeUserText');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const matchesContainer = document.getElementById('matchesContainer');
+        const leaderboardTableBody = document.getElementById('leaderboardTableBody');
+
+        let currentUser = null;
+
+        window.toggleAboutModal = function() {
+            aboutModal.classList.toggle('hidden');
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedUser = localStorage.getItem('oneligue_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                authModal.style.display = 'none';
+                welcomeUserText.textContent = `مرحباً، ${currentUser.userId}`;
+                loadAppData();
+            }
+        });
+
+        loginRegisterBtn.onclick = async () => {
+            const userId = userIdInput.value.trim();
+            const phone = userPhoneInput.value.trim();
+
+            if (!userId || !phone) {
+                authErrorMsg.textContent = "⚠️ أدخل الـ ID ورقم الهاتف من فضلك.";
+                return;
+            }
+
+            authErrorMsg.textContent = "جاري التحقق أو إنشاء الحساب...";
+
+            try {
+                const userRef = doc(db, "leaderboard", userId);
+                const userSnap = await getDoc(userRef);
+
+                if (userSnap.exists()) {
+                    const data = userSnap.data();
+                    if (data.phone && data.phone !== phone) {
+                        authErrorMsg.textContent = "❌ رقم الهاتف غير مطابق لهذا الـ ID!";
+                        return;
+                    }
+                    currentUser = { userId: userId, phone: phone };
+                } else {
+                    await setDoc(userRef, {
+                        userId: userId,
+                        phone: phone,
+                        totalPoints: 0,
+                        monthlyPoints: 0,
+                        lastPredictionTime: new Date()
+                    });
+                    currentUser = { userId: userId, phone: phone };
+                }
+
+                localStorage.setItem('oneligue_user', JSON.stringify(currentUser));
+                authModal.style.display = 'none';
+                welcomeUserText.textContent = `مرحباً، ${currentUser.userId}`;
+                loadAppData();
+            } catch (e) {
+                console.error(e);
+                authErrorMsg.textContent = "❌ حدث خطأ في الاتصال بقاعدة البيانات.";
+            }
+        };
+
+        logoutBtn.onclick = () => {
+            localStorage.removeItem('oneligue_user');
+            location.reload();
+        };
+
+        async function loadAppData() {
+            loadMatches();
+            loadLeaderboard();
+        }
+
+        async function loadMatches() {
+            try {
+                const querySnapshot = await getDocs(collection(db, "matches"));
+                matchesContainer.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    matchesContainer.innerHTML = `<p class="text-center text-xs text-slate-500 py-4">لا توجد مباريات مضافة حالياً.</p>`;
+                    return;
+                }
+
+                querySnapshot.forEach(docSnap => {
+                    const match = docSnap.data();
+                    const matchId = docSnap.id;
+                    const isLocked = match.isLocked;
+
+                    const matchCard = document.createElement('div');
+                    matchCard.className = "bg-slate-950 border border-slate-800/80 p-4 rounded-xl space-y-3";
+                    
+                    matchCard.innerHTML = `
+                        <div class="flex justify-between items-center text-xs text-slate-400">
+                            <span class="font-bold text-white">${match.homeTeam || 'المضيف'} VS ${match.awayTeam || 'الضيف'}</span>
+                            <span class="${isLocked ? 'text-rose-400' : 'text-emerald-400 font-bold'}">${isLocked ? '🔒 مغلقة' : '🔓 مفتوحة (10 دقائق ذهبية)'}</span>
+                        </div>
+                        <div class="text-center text-xs text-amber-300 font-bold pt-1">
+                            سؤال: مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 pt-1">
+                            <button onclick="submitPrediction('${matchId}', 'yes')" class="bg-slate-900 hover:bg-rose-600 border border-slate-800 text-[11px] font-bold py-2.5 rounded-lg transition text-slate-200">نعم (${match.homeTeam || 'المضيف'})</button>
+                            <button onclick="submitPrediction('${matchId}', 'no')" class="bg-slate-900 hover:bg-rose-600 border border-slate-800 text-[11px] font-bold py-2.5 rounded-lg transition text-slate-200">لا (${match.awayTeam || 'الضيف'})</button>
+                            <button onclick="submitPrediction('${matchId}', 'draw_00')" class="bg-slate-900 hover:bg-rose-600 border border-slate-800 text-[11px] font-bold py-2.5 rounded-lg transition text-slate-200">تعادل 0-0</button>
+                        </div>
+                    `;
+                    matchesContainer.appendChild(matchCard);
+                });
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        openSidebarBtn.onclick = () => toggleSidebar(true);
-        closeSidebarBtn.onclick = () => toggleSidebar(false);
-        sidebarOverlay.onclick = () => toggleSidebar(false);
+        window.submitPrediction = async function(matchId, prediction) {
+            if (!currentUser) return;
 
-        function openModal(modalId) {
-            toggleSidebar(false);
-            document.getElementById(modalId).classList.remove('hidden');
-        }
+            const matchRef = doc(db, "matches", matchId);
+            const matchSnap = await getDoc(matchRef);
+            if (matchSnap.exists() && matchSnap.data().isLocked) {
+                alert("⚠️ عذراً، انتهت فترة الـ 10 دقائق الذهبية وتم قفل التوقعات لهذه المباراة!");
+                return;
+            }
 
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
+            try {
+                const now = new Date();
+                const predId = `${matchId}_${currentUser.userId}`;
+                const predRef = doc(db, "predictions", predId);
+                
+                await setDoc(predRef, {
+                    matchId: matchId,
+                    userId: currentUser.userId,
+                    prediction: prediction,
+                    timestamp: now
+                });
+
+                // تحديث وقت آخر توقع للمستخدم لتستخدم كـ Tie-breaker للسرعة
+                const userRef = doc(db, "leaderboard", currentUser.userId);
+                await updateDoc(userRef, { lastPredictionTime: now });
+
+                alert("✅ تم تسجيل توقعك بنجاح!");
+            } catch (e) {
+                console.error(e);
+                alert("❌ حدث خطأ أثناء حفظ التوقع.");
+            }
+        };
+
+        // تحميل وترتيب جدول الترتيب: الأولوية لـ totalPoints (أو نقاط اليوم) ثم أسبقية الـ timestamp (السرعة)
+        async function loadLeaderboard() {
+            try {
+                // جلب اللاعبين مرتبين تنازلياً حسب النقاط، ثم تصاعدياً حسب سرعة التوقع (lastPredictionTime)
+                const q = query(collection(db, "leaderboard"), orderBy("totalPoints", "desc"), orderBy("lastPredictionTime", "asc"), limit(50));
+                const querySnapshot = await getDocs(q);
+                
+                leaderboardTableBody.innerHTML = "";
+
+                if (querySnapshot.empty) {
+                    leaderboardTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-slate-500">لا يوجد مشاركون حتى الآن.</td></tr>`;
+                    return;
+                }
+
+                let rank = 1;
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    
+                    const row = document.createElement('tr');
+                    row.className = "hover:bg-slate-800/30 transition";
+                    row.innerHTML = `
+                        <td class="py-3 px-3 font-bold text-amber-400">#${rank}</td>
+                        <td class="py-3 px-3 font-semibold text-white">${data.userId}</td>
+                        <td class="py-3 px-3 text-left font-black text-rose-400">${data.totalPoints || 0} نقطة</td>
+                    `;
+                    leaderboardTableBody.appendChild(row);
+                    rank++;
+                });
+            } catch (e) {
+                console.error(e);
+                leaderboardTableBody.innerHTML = `<tr><td colspan="3" class="text-center py-4 text-rose-500">خطأ في تحميل الترتيب.</td></tr>`;
+            }
         }
     </script>
-
-    <script type="module" src="app.js"></script>
 </body>
 </html>
