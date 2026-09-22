@@ -34,7 +34,6 @@ const translations = {
         alertErrorPred: "❌ Error saving prediction.",
         noMatches: "No matches available.",
         noRankings: "No rankings yet.",
-        drawBtn: "Draw 🤝",
         menu: "Menu",
         about: "ℹ️ About Us",
         privacy: "🔒 Privacy Policy",
@@ -60,7 +59,11 @@ const translations = {
         navFooter: "Built for Football Predictors ⚽",
         whatsappLabel: "Official Instagram Page",
         pointsLabel: "pts",
-        totalPlayersLabel: "Total Registered Players: "
+        totalPlayersLabel: "Total Registered Players: ",
+        coreQuestionTitle: "Who will score FIRST in this match?",
+        optionYes: "Yes",
+        optionNo: "No",
+        optionDraw: "Draw 0-0"
     },
     ar: {
         saveBtnLocked: "تم قفل الهوية 🔒 (تغيير المعرف)",
@@ -75,7 +78,6 @@ const translations = {
         alertErrorPred: "❌ خطأ في حفظ التوقع.",
         noMatches: "لا توجد مباريات متاحة حالياً.",
         noRankings: "لا توجد ترتيبات حتى الآن.",
-        drawBtn: "تعادل 🤝",
         menu: "القائمة",
         about: "ℹ️ من نحن",
         privacy: "🔒 سياسة الخصوصية",
@@ -101,7 +103,11 @@ const translations = {
         navFooter: "مبني لعشاق التوقعات ⚽",
         whatsappLabel: "الصفحة الرسمية على إنستغرام",
         pointsLabel: "نقاط",
-        totalPlayersLabel: "إجمالي المشتركين المسجلين: "
+        totalPlayersLabel: "إجمالي المشتركين المسجلين: ",
+        coreQuestionTitle: "مَنْ سَجَّلَ أَوَّلاً في هذه المباراة؟",
+        optionYes: "نعم",
+        optionNo: "لا",
+        optionDraw: "تعادل 0-0"
     }
 };
 
@@ -255,6 +261,7 @@ async function checkAndSaveUser(userId, userContact) {
             }
         }
 
+        const now = new Date();
         localStorage.setItem('prediction_user_id', userId);
         localStorage.setItem('prediction_user_contact', userContact);
         userIdInput.disabled = true;
@@ -263,10 +270,16 @@ async function checkAndSaveUser(userId, userContact) {
 
         let currentPoints = userSnap.exists() ? (userSnap.data().totalPoints || 0) : 0;
         let currentMonthlyPoints = userSnap.exists() ? (userSnap.data().monthlyPoints || 0) : 0;
-        let creationTime = userSnap.exists() ? (userSnap.data().createdAt || Date.now()) : Date.now();
+        let creationTime = userSnap.exists() ? (userSnap.data().createdAt || now) : now;
+        let lastPredTime = userSnap.exists() ? (userSnap.data().lastPredictionTime || now) : now;
 
         await setDoc(userRef, { 
-            userId, contact: userContact, totalPoints: currentPoints, monthlyPoints: currentMonthlyPoints, createdAt: creationTime 
+            userId, 
+            contact: userContact, 
+            totalPoints: currentPoints, 
+            monthlyPoints: currentMonthlyPoints, 
+            createdAt: creationTime,
+            lastPredictionTime: lastPredTime
         }, { merge: true });
 
         alert(t.alertSuccessId);
@@ -339,14 +352,19 @@ async function loadMatches() {
                         <span class="font-bold text-sm text-white">${awayTeamName}</span>
                     </div>
                 </div>
+                <div class="text-center text-sm sm:text-base text-sky-400 font-black pt-2 pb-1 tracking-wide bg-sky-950/40 py-2 rounded-xl border border-sky-500/30">
+                    ❓ ${t.coreQuestionTitle}
+                </div>
             `;
 
             const actions = document.createElement('div');
-            actions.className = "flex gap-2 pt-2";
+            actions.className = "grid grid-cols-3 gap-2 pt-1";
             
-            const homeLabel = match.homeTeamWin || `${homeTeamName} Win`;
-            const awayLabel = match.awayTeamWin || `${awayTeamName} Win`;
-            const opts = [{ l: homeLabel, v: '1' }, { l: t.drawBtn, v: 'X' }, { l: awayLabel, v: '2' }];
+            const opts = [
+                { l: `${t.optionYes} (${homeTeamName})`, v: 'yes' },
+                { l: `${t.optionNo} (${awayTeamName})`, v: 'no' },
+                { l: t.optionDraw, v: 'draw_00' }
+            ];
 
             opts.forEach(opt => {
                 const isSelected = userChoice === opt.v;
@@ -357,7 +375,7 @@ async function loadMatches() {
                     btnStyle = isSelected ? 'bg-sky-700/60 text-white border-sky-600 cursor-not-allowed' : 'bg-slate-950 text-slate-600 border-slate-900 cursor-not-allowed';
                 }
 
-                btn.className = `flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition truncate px-1 ${btnStyle}`;
+                btn.className = `py-2.5 rounded-lg text-[11px] font-bold border transition truncate px-1 text-slate-200 ${btnStyle}`;
                 btn.textContent = opt.l;
                 
                 if (!isLocked) {
@@ -378,19 +396,33 @@ async function submitPrediction(matchId, choice, btnElement) {
 
     if (!userId || !userContact) { alert(t.alertNoSave); userIdInput.focus(); return; }
 
+    const matchRef = doc(db, "matches", matchId);
+    const matchSnap = await getDoc(matchRef);
+    if (matchSnap.exists() && matchSnap.data().isLocked) {
+        alert(currentLang === 'ar' ? "⚠️ عذراً، تم قفل التوقعات لهذه المباراة!" : "⚠️ Sorry, predictions are locked for this match!");
+        return;
+    }
+
     try {
-        await setDoc(doc(db, "predictions", `${userId}_${matchId}`), {
-            userId, matchId, prediction: choice, timestamp: new Date()
+        const now = new Date();
+        await setDoc(doc(db, "predictions", `${matchId}_${userId}`), {
+            userId, matchId, prediction: choice, timestamp: now
         });
 
+        const userRef = doc(db, "leaderboard", userId);
+        await setDoc(userRef, { lastPredictionTime: now }, { merge: true });
+
         btnElement.parentElement.querySelectorAll('button').forEach(b => {
-            b.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-slate-900/80 border-slate-700 text-white truncate px-1";
+            b.className = "py-2.5 rounded-lg text-[11px] font-bold border transition bg-slate-900 border-slate-800 text-slate-200 truncate px-1";
         });
-        btnElement.className = "flex-1 py-2.5 rounded-xs text-[11px] font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30 truncate px-1";
+        btnElement.className = "py-2.5 rounded-lg text-[11px] font-bold border transition bg-sky-600 text-white border-sky-400 shadow-md shadow-sky-500/30 truncate px-1";
         
         alert(t.alertSuccessPred);
         loadLeaderboard();
-    } catch (e) { alert(t.alertErrorPred); }
+    } catch (e) { 
+        console.error(e);
+        alert(t.alertErrorPred); 
+    }
 }
 
 async function loadLeaderboard() {
@@ -402,16 +434,14 @@ async function loadLeaderboard() {
     try {
         const sortField = currentRankType === 'global' ? 'totalPoints' : 'monthlyPoints';
         
-        // جلب أول 50 لاعباً يملكون أعلى نقاط في السيرفر باستخدام limit(50)
         const qTop = query(
             collection(db, "leaderboard"), 
             orderBy(sortField, "desc"), 
-            orderBy("createdAt", "asc"),
+            orderBy("lastPredictionTime", "asc"),
             limit(50)
         );
         
         const topSnap = await getDocs(qTop);
-
         updateTotalPlayersCount();
 
         if (topSnap.empty) {
@@ -449,7 +479,6 @@ async function loadLeaderboard() {
         tableHtml += `</tbody></table></div>`;
         tableContainer.innerHTML = tableHtml;
 
-        // حساب بطاقة اللاعب الحالي الدقيقة
         if (myCardContainer && currentUserId) {
             const userDocRef = doc(db, "leaderboard", currentUserId);
             const userSnap = await getDoc(userDocRef);
