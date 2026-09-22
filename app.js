@@ -219,15 +219,19 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
+// دالة الحفظ المحسنة والمحمية ضد الأخطاء
 async function checkAndSaveUser(userId, userContact) {
     const t = translations[currentLang];
+    const cleanId = userId.trim();
+    const cleanContact = userContact.trim();
+
     try {
-        const userRef = doc(db, "leaderboard", userId);
+        const userRef = doc(db, "leaderboard", cleanId);
         const userSnap = await getDoc(userRef);
 
         if (userSnap.exists()) {
             const savedLocalId = localStorage.getItem('prediction_user_id');
-            if (savedLocalId !== userId) {
+            if (savedLocalId && savedLocalId !== cleanId) {
                 alert(t.alertTakenId);
                 userIdInput.focus();
                 return;
@@ -235,19 +239,26 @@ async function checkAndSaveUser(userId, userContact) {
         }
 
         const now = new Date();
-        localStorage.setItem('prediction_user_id', userId);
-        localStorage.setItem('prediction_user_contact', userContact);
+        localStorage.setItem('prediction_user_id', cleanId);
+        localStorage.setItem('prediction_user_contact', cleanContact);
         userIdInput.disabled = true;
         if (contactContainer) contactContainer.style.display = 'none';
         saveIdBtn.textContent = t.saveBtnLocked;
 
-        let currentDailyPoints = userSnap.exists() ? (userSnap.data().dailyPoints || 0) : 0;
-        let creationTime = userSnap.exists() ? (userSnap.data().createdAt || now) : now;
-        let lastPredTime = userSnap.exists() ? (userSnap.data().lastPredictionTime || now) : now;
+        let currentDailyPoints = 0;
+        let creationTime = now;
+        let lastPredTime = now;
+
+        if (userSnap.exists()) {
+            const data = userSnap.data();
+            currentDailyPoints = Number(data.dailyPoints) || 0;
+            creationTime = data.createdAt || now;
+            lastPredTime = data.lastPredictionTime || now;
+        }
 
         await setDoc(userRef, { 
-            userId, 
-            contact: userContact, 
+            userId: cleanId, 
+            contact: cleanContact, 
             dailyPoints: currentDailyPoints, 
             createdAt: creationTime,
             lastPredictionTime: lastPredTime
@@ -331,7 +342,6 @@ async function loadMatches() {
             const actions = document.createElement('div');
             actions.className = "grid grid-cols-3 gap-2 pt-1";
             
-            // أسماء الفرق الصحيحة و No Goal
             const opts = [
                 { l: homeTeamName, v: 'home' },
                 { l: awayTeamName, v: 'away' },
