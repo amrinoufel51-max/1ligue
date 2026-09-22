@@ -8,7 +8,7 @@ const firebaseConfig = {
     storageBucket: "league-91565.firebasestorage.app",
     messagingSenderId: "923003244062",
     appId: "1:923003244062:web:a2bf91b86de0d1bf73a80f"
-};
+}; 
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
