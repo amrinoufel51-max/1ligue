@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, limit, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, setDoc, doc, getDoc, query, where, orderBy, limit, getCountFromServer, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyBmh4fqvWpGLietTIESEyd6BkTCtMnMquw",
@@ -219,7 +219,6 @@ saveIdBtn.addEventListener('click', () => {
     }
 });
 
-// دالة الحفظ المحسنة (بحيث lastPredictionTime لا يتخذ وقت التسجيل الأول تلقائياً)
 async function checkAndSaveUser(userId, userContact) {
     const t = translations[currentLang];
     const cleanId = userId.trim();
@@ -247,7 +246,6 @@ async function checkAndSaveUser(userId, userContact) {
 
         let currentDailyPoints = 0;
         let creationTime = now;
-        // إذا كان الحساب جديداً، نعطيه وقتاً قديماً (مثلاً قبل سنة) لكي لا يتصدر بقسوة قبل حل أي سؤال
         let lastPredTime = new Date(0); 
 
         if (userSnap.exists()) {
@@ -372,7 +370,7 @@ async function loadMatches() {
     } catch (e) { console.error("Error loading matches:", e); }
 }
 
-// دالة إرسال الإجابة (هنا يتم تحديث lastPredictionTime حصرياً لوقت المشاركة الفعلية)
+// دالة إرسال الإجابة باستخدام توقيت السيرفر الرسمي (serverTimestamp) حصرياً
 async function submitPrediction(matchId, choice, btnElement) {
     const userId = localStorage.getItem('prediction_user_id');
     const userContact = localStorage.getItem('prediction_user_contact');
@@ -380,22 +378,25 @@ async function submitPrediction(matchId, choice, btnElement) {
 
     if (!userId || !userContact) { alert(t.alertNoSave); userIdInput.focus(); return; }
 
-    const matchRef = doc(db, "matches", matchId);
-    const matchSnap = await getDoc(matchRef);
-    if (matchSnap.exists() && matchSnap.data().isLocked) {
-        alert(currentLang === 'ar' ? "⚠️ عذراً، تم إغلاق هذا التحدي!" : "⚠️ Sorry, this challenge is locked!");
-        return;
-    }
-
     try {
-        const now = new Date(); // وقت إرسال الإجابة الفعلي
+        const matchRef = doc(db, "matches", matchId);
+        const matchSnap = await getDoc(matchRef);
+        if (matchSnap.exists() && matchSnap.data().isLocked) {
+            alert(currentLang === 'ar' ? "⚠️ عذراً، تم إغلاق هذا التحدي!" : "⚠️ Sorry, this challenge is locked!");
+            return;
+        }
+
+        const sTime = serverTimestamp(); // توقيت سيرفر فايربيس الرسمي والغير قابل للتلاعب
+
         await setDoc(doc(db, "predictions", `${matchId}_${userId}`), {
-            userId, matchId, prediction: choice, timestamp: now
+            userId: String(userId), 
+            matchId: String(matchId), 
+            prediction: String(choice), 
+            timestamp: sTime
         });
 
-        // تحديث وقت النشاط الفعلي للاعب لكي يرتفع في الترتيب عند التعادل في النقاط
         const userRef = doc(db, "leaderboard", userId);
-        await setDoc(userRef, { lastPredictionTime: now }, { merge: true });
+        await setDoc(userRef, { lastPredictionTime: sTime }, { merge: true });
 
         btnElement.parentElement.querySelectorAll('button').forEach(b => {
             b.className = "py-2.5 rounded-lg text-[11px] font-bold border transition bg-slate-900 border-slate-800 text-slate-200 truncate px-1";
@@ -405,8 +406,8 @@ async function submitPrediction(matchId, choice, btnElement) {
         alert(t.alertSuccessPred);
         loadLeaderboard();
     } catch (e) { 
-        console.error(e);
-        alert(t.alertErrorPred); 
+        console.error("DETAILED SUBMIT ERROR:", e);
+        alert(t.alertErrorPred + " (" + e.message + ")"); 
     }
 }
 
